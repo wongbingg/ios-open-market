@@ -8,7 +8,6 @@
 import UIKit
 
 class TableViewCell: UITableViewCell {
-    
     let productImageView: UIImageView = {
         let imageView = UIImageView()
         imageView.translatesAutoresizingMaskIntoConstraints = false
@@ -42,11 +41,31 @@ class TableViewCell: UITableViewCell {
         return label
     }()
     
+    lazy var indicatorLabel: UILabel = {
+        let label = UILabel()
+        label.translatesAutoresizingMaskIntoConstraints = false
+        let attriubutedString = NSMutableAttributedString(string: "재고 : 890 ")
+        let chevronAttachment = NSTextAttachment()
+        let chevronImage = UIImage(systemName: "chevron.right", withConfiguration: UIImage.SymbolConfiguration(pointSize: 13,weight: .semibold))?.withTintColor(.lightGray)
+        chevronAttachment.image = chevronImage
+        let imageWidth = chevronImage?.size.width ?? 0
+        let imageHeight = chevronImage?.size.height ?? 0
+        chevronAttachment.bounds = CGRect(x: 0, y: -1, width: imageWidth,  height: imageHeight)
+        attriubutedString.append(NSAttributedString(attachment: chevronAttachment))
+        
+        label.attributedText = attriubutedString
+        label.textAlignment = .right
+        label.textColor = .lightGray
+        label.sizeToFit()
+        return label
+    }()
+    
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: .default, reuseIdentifier: reuseIdentifier)
         
         self.contentView.addSubview(productImageView)
         self.contentView.addSubview(verticalStackView)
+        self.contentView.addSubview(indicatorLabel)
         
         verticalStackView.addArrangedSubview(productNameLabel)
         verticalStackView.addArrangedSubview(productPriceLabel)
@@ -59,8 +78,12 @@ class TableViewCell: UITableViewCell {
         verticalStackView.leadingAnchor.constraint(equalTo: productImageView.trailingAnchor).isActive = true
         verticalStackView.topAnchor.constraint(equalTo: self.contentView.topAnchor).isActive = true
         verticalStackView.bottomAnchor.constraint(equalTo: self.contentView.bottomAnchor).isActive = true
-        verticalStackView.trailingAnchor.constraint(equalTo: self.contentView.trailingAnchor).isActive = true
-
+        verticalStackView.trailingAnchor.constraint(equalTo: self.indicatorLabel.leadingAnchor).isActive = true
+        
+        
+        indicatorLabel.trailingAnchor.constraint(equalTo: self.contentView.trailingAnchor, constant: -10).isActive = true
+        indicatorLabel.bottomAnchor.constraint(equalTo: productNameLabel.bottomAnchor).isActive = true
+        
     }
     
     required init?(coder: NSCoder) {

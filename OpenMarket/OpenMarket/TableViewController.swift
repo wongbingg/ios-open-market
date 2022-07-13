@@ -51,9 +51,9 @@ class TableViewController: UITableViewController {
             return UITableViewCell()
         }
         let selectedProduct = productList[indexPath.row]
-        cell.layoutIfNeeded()
+//        cell.layoutIfNeeded()
         cell.setupCellData(with: selectedProduct)
-        tableView.reloadData()
+//        tableView.reloadData()
         return cell
     }
 

@@ -11,7 +11,7 @@ class TableViewCell: UITableViewCell {
     private let productImageView: UIImageView = {
         let imageView = UIImageView()
         imageView.translatesAutoresizingMaskIntoConstraints = false
-        imageView.image = UIImage(named: "loading")
+        //        imageView.image = UIImage(named: "loading")
         imageView.contentMode = .scaleAspectFit
         return imageView
     }()
@@ -85,7 +85,7 @@ class TableViewCell: UITableViewCell {
         guard let url = URL(string: inputData.thumbnail) else {
             return
         }
-        self.imageView?.load(url: url)
+        self.imageView?.loadImage(url: url)
         self.productNameLabel.text = inputData.name
         self.productPriceLabel.text = "\(inputData.currency) \(inputData.price)"
         setupIndicatorLabelData(stock: inputData.stock)
@@ -120,6 +120,15 @@ extension UIImageView {
                     }
                 }
             }
+        }
+    }
+    
+    func loadImage(url: URL) {
+        do {
+            let data = try Data(contentsOf: url)
+            self.image = UIImage(data: data)
+        } catch {
+            fatalError("error")
         }
     }
 }

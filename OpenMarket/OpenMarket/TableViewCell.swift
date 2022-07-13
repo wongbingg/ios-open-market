@@ -8,14 +8,15 @@
 import UIKit
 
 class TableViewCell: UITableViewCell {
-    let productImageView: UIImageView = {
+    private let productImageView: UIImageView = {
         let imageView = UIImageView()
         imageView.translatesAutoresizingMaskIntoConstraints = false
+        imageView.image = UIImage(named: "loading")
         imageView.contentMode = .scaleAspectFit
         return imageView
     }()
     
-    let verticalStackView: UIStackView = {
+    private let verticalStackView: UIStackView = {
         let stackview = UIStackView()
         stackview.translatesAutoresizingMaskIntoConstraints = false
         stackview.axis = .vertical
@@ -24,7 +25,7 @@ class TableViewCell: UITableViewCell {
         return stackview
     }()
     
-    let productNameLabel: UILabel = {
+    private let productNameLabel: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
         label.font = UIFont.preferredFont(forTextStyle: .title2)
@@ -32,7 +33,7 @@ class TableViewCell: UITableViewCell {
         return label
     }()
     
-    let productPriceLabel: UILabel = {
+    private let productPriceLabel: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
         label.textColor = .lightGray
@@ -41,19 +42,9 @@ class TableViewCell: UITableViewCell {
         return label
     }()
     
-    lazy var indicatorLabel: UILabel = {
+    private lazy var indicatorLabel: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
-        let attriubutedString = NSMutableAttributedString(string: "재고 : 890 ")
-        let chevronAttachment = NSTextAttachment()
-        let chevronImage = UIImage(systemName: "chevron.right", withConfiguration: UIImage.SymbolConfiguration(pointSize: 13,weight: .semibold))?.withTintColor(.lightGray)
-        chevronAttachment.image = chevronImage
-        let imageWidth = chevronImage?.size.width ?? 0
-        let imageHeight = chevronImage?.size.height ?? 0
-        chevronAttachment.bounds = CGRect(x: 0, y: -1, width: imageWidth,  height: imageHeight)
-        attriubutedString.append(NSAttributedString(attachment: chevronAttachment))
-        
-        label.attributedText = attriubutedString
         label.textAlignment = .right
         label.textColor = .lightGray
         label.sizeToFit()
@@ -89,4 +80,47 @@ class TableViewCell: UITableViewCell {
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
+    
+    func setupCellData(with inputData: Product) {
+        guard let url = URL(string: inputData.thumbnail) else {
+            return
+        }
+        self.imageView?.load(url: url)
+        self.productNameLabel.text = inputData.name
+        self.productPriceLabel.text = "\(inputData.currency) \(inputData.price)"
+        setupIndicatorLabelData(stock: inputData.stock)
+    }
+    private func setupIndicatorLabelData(stock: Int) {
+        let attriubutedString: NSMutableAttributedString
+        if stock > 0 {
+            attriubutedString = NSMutableAttributedString(string: "재고 : \(stock) ")
+        } else {
+            attriubutedString = NSMutableAttributedString(string: "품절 ")
+            self.indicatorLabel.textColor = .yellow
+        }
+        let chevronAttachment = NSTextAttachment()
+        let chevronImage = UIImage(systemName: "chevron.right", withConfiguration: UIImage.SymbolConfiguration(pointSize: 13,weight: .semibold))?.withTintColor(.lightGray)
+        chevronAttachment.image = chevronImage
+        let imageWidth = chevronImage?.size.width ?? 0
+        let imageHeight = chevronImage?.size.height ?? 0
+        chevronAttachment.bounds = CGRect(x: 0, y: -1, width: imageWidth,  height: imageHeight)
+        attriubutedString.append(NSAttributedString(attachment: chevronAttachment))
+        
+        self.indicatorLabel.attributedText = attriubutedString
+    }
 }
+
+extension UIImageView {
+    func load(url: URL) {
+        DispatchQueue.global().async { [weak self] in
+            if let data = try? Data(contentsOf: url) {
+                if let image = UIImage(data: data) {
+                    DispatchQueue.main.async {
+                        self?.image = image
+                    }
+                }
+            }
+        }
+    }
+}
+

@@ -64,12 +64,14 @@ class CustomCell: UICollectionViewCell {
         
         productImageView.centerYAnchor.constraint(equalTo: self.contentView.centerYAnchor).isActive = true
         productImageView.leadingAnchor.constraint(equalTo: self.contentView.leadingAnchor).isActive = true
+        productImageView.topAnchor.constraint(equalTo: self.contentView.topAnchor, constant: 10).isActive = true
+        productImageView.bottomAnchor.constraint(equalTo: self.contentView.bottomAnchor,constant: -10).isActive = true
         productImageView.widthAnchor.constraint(equalTo: self.contentView.widthAnchor, multiplier: 0.2).isActive = true
-        productImageView.heightAnchor.constraint(equalTo: self.heightAnchor).isActive = true
+        productImageView.heightAnchor.constraint(equalTo: productImageView.widthAnchor).isActive = true
         
         verticalStackView.leadingAnchor.constraint(equalTo: productImageView.trailingAnchor).isActive = true
-        verticalStackView.topAnchor.constraint(equalTo: self.contentView.topAnchor).isActive = true
-        verticalStackView.bottomAnchor.constraint(equalTo: self.contentView.bottomAnchor).isActive = true
+        verticalStackView.topAnchor.constraint(equalTo: self.contentView.topAnchor, constant: 10).isActive = true
+        verticalStackView.bottomAnchor.constraint(equalTo: self.contentView.bottomAnchor, constant: -10).isActive = true
         verticalStackView.trailingAnchor.constraint(equalTo: self.indicatorLabel.leadingAnchor).isActive = true
         
         

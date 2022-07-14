@@ -39,7 +39,9 @@ class MainViewController: UIViewController {
                 self.collectionView.reloadData()
             }
         }
-        
+//        guard let filePath = NSDataAsset.init(name: "MockData") else { return }
+//        guard let result = decode(from: filePath.data, to: ProductPage.self) else { return }
+//        productList = result.pages
         self.navigationItem.titleView = segmentController
         
         self.segmentController.addTarget(self, action: #selector(layout), for: .valueChanged)
@@ -57,16 +59,19 @@ extension MainViewController {
         return UICollectionViewCompositionalLayout.list(using: config)
     }
     private func createGridLayout() -> UICollectionViewLayout {
-        let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(0.5),
+        let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
                                               heightDimension: .fractionalHeight(1.0))
         let item = NSCollectionLayoutItem(layoutSize: itemSize)
-        item.contentInsets = NSDirectionalEdgeInsets(top: 5, leading: 5, bottom: 5, trailing: 5)
+//        item.contentInsets = NSDirectionalEdgeInsets(top: 5, leading: 5, bottom: 5, trailing: 5)
         let groupSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
-                                               heightDimension: .fractionalWidth(0.8))
-        let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize,
-                                                       subitems: [item])
+                                               heightDimension: .absolute(100))
+        let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize, subitem: item, count: 2)
+        let spacing = CGFloat(10)
+        group.interItemSpacing = .fixed(spacing)
         
         let section = NSCollectionLayoutSection(group: group)
+        section.interGroupSpacing = spacing
+        section.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 19, bottom: 0, trailing: 10)
         
         let layout = UICollectionViewCompositionalLayout(section: section)
         return layout
@@ -131,5 +136,4 @@ extension MainViewController: UICollectionViewDelegate {
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         collectionView.deselectItem(at: indexPath, animated: true)
     }
-    
 }

@@ -11,14 +11,14 @@
  */
 import UIKit
 
+@available(iOS 14.0, *)
 class MainViewController: UIViewController {
-    // MARK: - Properties
-    private var shouldHideFirstView: Bool? {
-        didSet {
-            guard let shouldHideFirstView = shouldHideFirstView else { return }
-            self.firstView.isHidden = shouldHideFirstView
-            self.secondView.isHidden = !shouldHideFirstView
-        }
+    
+    var productList: [Product]?
+    var manager = Manager()
+    
+    enum Section {
+        case main
     }
     
     private let segmentController: UISegmentedControl = {
@@ -28,56 +28,108 @@ class MainViewController: UIViewController {
         return segmentController
     }()
     
-    private let firstView: UIView = {
-        let view = UIView()
-        view.translatesAutoresizingMaskIntoConstraints = false
-        view.backgroundColor = .red
-        return view
-    }()
+    var dataSource: UICollectionViewDiffableDataSource<Section, Int>! = nil
+    var collectionView: UICollectionView! = nil
     
-    private let secondView: UIView = {
-        let view = UIView()
-        view.translatesAutoresizingMaskIntoConstraints = false
-        view.backgroundColor = .blue
-        return view
-    }()
-    
-    // MARK: - View Life Cycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        self.view.backgroundColor = .systemBackground
-        addUIComponents()
-        configurateLayout()
-        setupSegment()
-    }
-    
-    private func addUIComponents() {
+        manager.dataTask { result in
+            self.productList = result.pages
+            DispatchQueue.main.async {
+                self.collectionView.reloadData()
+            }
+        }
+        
         self.navigationItem.titleView = segmentController
-        self.view.addSubview(firstView)
-        self.view.addSubview(secondView)
+        
+        self.segmentController.addTarget(self, action: #selector(layout), for: .valueChanged)
+        self.segmentController.addTarget(self, action: #selector(dataSouce), for: .valueChanged)
+        configureHierarchy()
+        configureDataSource()
+    }
+}
+
+@available(iOS 14.0, *)
+extension MainViewController {
+    /// - Tag: List
+    private func createLayout() -> UICollectionViewLayout {
+        let config = UICollectionLayoutListConfiguration(appearance: .plain)
+        return UICollectionViewCompositionalLayout.list(using: config)
+    }
+    private func createGridLayout() -> UICollectionViewLayout {
+        let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(0.5),
+                                              heightDimension: .fractionalHeight(1.0))
+        let item = NSCollectionLayoutItem(layoutSize: itemSize)
+        item.contentInsets = NSDirectionalEdgeInsets(top: 5, leading: 5, bottom: 5, trailing: 5)
+        let groupSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
+                                               heightDimension: .fractionalWidth(0.8))
+        let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize,
+                                                       subitems: [item])
+        
+        let section = NSCollectionLayoutSection(group: group)
+        
+        let layout = UICollectionViewCompositionalLayout(section: section)
+        return layout
+    }
+}
+
+@available(iOS 14.0, *)
+extension MainViewController {
+    
+    @objc private func layout() {
+        if segmentController.selectedSegmentIndex == 0 {
+            view.subviews.forEach { $0.removeFromSuperview() ; $0.isHidden = true }
+            collectionView = UICollectionView(frame: view.bounds, collectionViewLayout: createLayout())
+            collectionView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+            view.addSubview(collectionView)
+            collectionView.delegate = self
+            
+        } else {
+            view.subviews.forEach { $0.removeFromSuperview() ; $0.isHidden = true }
+            collectionView = UICollectionView(frame: view.bounds, collectionViewLayout: createGridLayout())
+            collectionView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+            view.addSubview(collectionView)
+            collectionView.delegate = self
+        }
     }
     
-    @objc private func didChangeValue(segment: UISegmentedControl) {
-        self.shouldHideFirstView = segment.selectedSegmentIndex != 0
+    private func configureHierarchy() {
+        collectionView = UICollectionView(frame: view.bounds, collectionViewLayout: createLayout())
+        collectionView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        view.addSubview(collectionView)
+        collectionView.delegate = self
+    }
+    @objc private func dataSouce() {
+        configureDataSource()
     }
     
-    private func configurateLayout() {
-        NSLayoutConstraint.activate([
-            self.firstView.leftAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.leftAnchor),
-            self.firstView.rightAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.rightAnchor),
-            self.firstView.topAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.topAnchor),
-            self.firstView.bottomAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.bottomAnchor),
-        ])
-        NSLayoutConstraint.activate([
-            self.secondView.leftAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.leftAnchor),
-            self.secondView.rightAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.rightAnchor),
-            self.secondView.topAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.topAnchor),
-            self.secondView.bottomAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.bottomAnchor),
-        ])
+    private func configureDataSource() {
+        
+        let cellRegistration = UICollectionView.CellRegistration<CustomCell, Int> { (cell, indexPath, item) in
+            if let productList = self.productList {
+                let selectedProduct = productList[indexPath.row]
+                cell.setupCellData(with: selectedProduct)
+            }
+        }
+        
+        dataSource = UICollectionViewDiffableDataSource<Section, Int>(collectionView: collectionView) {
+            (collectionView: UICollectionView, indexPath: IndexPath, identifier: Int) -> UICollectionViewCell? in
+            
+            return collectionView.dequeueConfiguredReusableCell(using: cellRegistration, for: indexPath, item: identifier)
+        }
+        
+        // initial data
+        var snapshot = NSDiffableDataSourceSnapshot<Section, Int>()
+        snapshot.appendSections([.main])
+        snapshot.appendItems(Array(0..<50)) // 이부분 어떻게 처리 .? 일단 받아오는 product 갯수만큼 임의지정 해주었다.
+        dataSource.apply(snapshot, animatingDifferences: true)
+    }
+}
+
+@available(iOS 14.0, *)
+extension MainViewController: UICollectionViewDelegate {
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        collectionView.deselectItem(at: indexPath, animated: true)
     }
     
-    private func setupSegment() {
-        didChangeValue(segment: self.segmentController)
-        self.segmentController.addTarget(self, action: #selector(didChangeValue(segment:)), for: .valueChanged)
-    }
 }

@@ -8,33 +8,26 @@
 import UIKit
 
 class TableViewController: UITableViewController {
+    
     private var productList: [Product]?
-    // MARK: - View Life Cycle Method
+    var manager = Manager()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
         tableView.register(TableViewCell.self, forCellReuseIdentifier: "ItemCell")
-        fetch()
+        manager.dataTask { result in
+            self.productList = result.pages
+            DispatchQueue.main.async {
+                self.tableView.reloadData()
+            }
+        }
     }
+    
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
-        tableView.reloadData()
     }
-    
-    // MARK: - Method
-    private func fetch() {
-        guard let filePath = NSDataAsset.init(name: "MockData") else {
-            return
-        }
-        
-        guard let result = decode(from: filePath.data, to: ProductPage.self) else {
-            return
-        }
-        productList = result.pages
-    }
-    
-    // MARK: - Table view data source
 
     override func numberOfSections(in tableView: UITableView) -> Int {
         return 1
@@ -56,5 +49,4 @@ class TableViewController: UITableViewController {
 //        tableView.reloadData()
         return cell
     }
-
 }

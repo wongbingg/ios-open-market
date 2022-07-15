@@ -28,20 +28,20 @@ class MainViewController: UIViewController {
         return segmentController
     }()
     
-    var dataSource: UICollectionViewDiffableDataSource<Section, Int>! = nil
+    var dataSource: UICollectionViewDiffableDataSource<Section, Product>! = nil
     var collectionView: UICollectionView! = nil
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        manager.dataTask { result in
-            self.productList = result.pages
-            DispatchQueue.main.async {
-                self.collectionView.reloadData()
-            }
-        }
-//        guard let filePath = NSDataAsset.init(name: "MockData") else { return }
-//        guard let result = decode(from: filePath.data, to: ProductPage.self) else { return }
-//        productList = result.pages
+        //        manager.dataTask { result in
+        //            self.productList = result.pages
+        //            DispatchQueue.main.async {
+        //                self.collectionView.reloadData()
+        //            }
+        //        }
+        //        guard let filePath = NSDataAsset.init(name: "MockData") else { return }
+        //        guard let result = decode(from: filePath.data, to: ProductPage.self) else { return }
+        //        productList = result.pages
         self.navigationItem.titleView = segmentController
         
         self.segmentController.addTarget(self, action: #selector(layout), for: .valueChanged)
@@ -62,7 +62,7 @@ extension MainViewController {
         let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
                                               heightDimension: .fractionalHeight(1.0))
         let item = NSCollectionLayoutItem(layoutSize: itemSize)
-//        item.contentInsets = NSDirectionalEdgeInsets(top: 5, leading: 5, bottom: 5, trailing: 5)
+        //        item.contentInsets = NSDirectionalEdgeInsets(top: 5, leading: 5, bottom: 5, trailing: 5)
         let groupSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
                                                heightDimension: .absolute(100))
         let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize, subitem: item, count: 2)
@@ -110,24 +110,33 @@ extension MainViewController {
     
     private func configureDataSource() {
         
-        let cellRegistration = UICollectionView.CellRegistration<CustomCell, Int> { (cell, indexPath, item) in
-            if let productList = self.productList {
-                let selectedProduct = productList[indexPath.row]
-                cell.setupCellData(with: selectedProduct)
-            }
+        let cellRegistration = UICollectionView.CellRegistration<CustomCell, Product> { (cell, indexPath, item) in
+//            if let productList = self.productList {
+//                let selectedProduct = productList[indexPath.row]
+                cell.setupCellData(with: item)
+//            }
         }
         
-        dataSource = UICollectionViewDiffableDataSource<Section, Int>(collectionView: collectionView) {
-            (collectionView: UICollectionView, indexPath: IndexPath, identifier: Int) -> UICollectionViewCell? in
+        dataSource = UICollectionViewDiffableDataSource<Section, Product>(collectionView: collectionView) {
+            (collectionView: UICollectionView, indexPath: IndexPath, identifier: Product) -> UICollectionViewCell? in
             
             return collectionView.dequeueConfiguredReusableCell(using: cellRegistration, for: indexPath, item: identifier)
         }
         
         // initial data
-        var snapshot = NSDiffableDataSourceSnapshot<Section, Int>()
-        snapshot.appendSections([.main])
-        snapshot.appendItems(Array(0..<50)) // 이부분 어떻게 처리 .? 일단 받아오는 product 갯수만큼 임의지정 해주었다.
-        dataSource.apply(snapshot, animatingDifferences: true)
+        manager.dataTask { [weak self] ProductPage in
+            var snapshot = NSDiffableDataSourceSnapshot<Section, Product>()
+            snapshot.appendSections([.main])
+            snapshot.appendItems(ProductPage.pages)
+            self?.dataSource.apply(snapshot, animatingDifferences: false)
+//            DispatchQueue.main.async {
+//                self?.collectionView.reloadData()
+//            }
+        }
+//        var snapshot = NSDiffableDataSourceSnapshot<Section, Product>()
+//        snapshot.appendSections([.main])
+//        snapshot.appendItems(productList!) // 이부분 어떻게 처리 .? 일단 받아오는 product 갯수만큼 임의지정 해주었다.
+//        dataSource.apply(snapshot, animatingDifferences: true)
     }
 }
 

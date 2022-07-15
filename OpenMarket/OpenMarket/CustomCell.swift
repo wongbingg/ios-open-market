@@ -77,7 +77,6 @@ class CustomCell: UICollectionViewCell {
         
         indicatorLabel.trailingAnchor.constraint(equalTo: self.contentView.trailingAnchor, constant: -10).isActive = true
         indicatorLabel.bottomAnchor.constraint(equalTo: productNameLabel.bottomAnchor).isActive = true
-        
     }
     
     required init?(coder: NSCoder) {
@@ -111,6 +110,10 @@ class CustomCell: UICollectionViewCell {
         
         self.indicatorLabel.attributedText = attriubutedString
     }
+    
+    override func prepareForReuse() {
+        self.indicatorLabel.textColor = .lightGray
+    }
 }
 
 extension UIImageView {
@@ -125,3 +128,6 @@ extension UIImageView {
     }
 }
 
+class CustomCell2: CustomCell {
+    
+}

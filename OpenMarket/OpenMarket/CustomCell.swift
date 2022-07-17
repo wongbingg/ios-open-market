@@ -7,16 +7,16 @@
 
 import UIKit
 
-class ListCell: UICollectionViewCell {
+class CustomCell: UICollectionViewCell {
     
-    private let productImageView: UIImageView = {
+    let productImageView: UIImageView = {
         let imageView = UIImageView()
         imageView.translatesAutoresizingMaskIntoConstraints = false
         imageView.contentMode = .scaleAspectFit
         return imageView
     }()
     
-    private let verticalStackView: UIStackView = {
+    let verticalStackView: UIStackView = {
         let stackview = UIStackView()
         stackview.translatesAutoresizingMaskIntoConstraints = false
         stackview.axis = .vertical
@@ -61,17 +61,17 @@ class ListCell: UICollectionViewCell {
         return label
     }()
     
-    override init(frame: CGRect) {
-        super.init(frame: frame)
-        setupAddSubviews()
-        setupConstraints()
+    private var constraintsList: [NSLayoutConstraint]?
+    
+    func setupAddSubviews(in cell: KindOfCell) {
+        if cell == .listCell {
+            setupAddSubviewsInListLayout()
+        } else {
+            setupAddSubviewsInGridLayout()
+        }
     }
     
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-    
-    private func setupAddSubviews() {
+    private func setupAddSubviewsInListLayout() {
         self.contentView.addSubview(productImageView)
         self.contentView.addSubview(verticalStackView)
         
@@ -82,21 +82,43 @@ class ListCell: UICollectionViewCell {
         verticalStackView.addArrangedSubview(productPriceLabel)
     }
     
-    private func setupConstraints() {
-        NSLayoutConstraint.activate([
-            productImageView.centerYAnchor.constraint(equalTo: self.contentView.centerYAnchor),
-            productImageView.leadingAnchor.constraint(equalTo: self.contentView.leadingAnchor),
-            productImageView.topAnchor.constraint(equalTo: self.contentView.topAnchor, constant: 10),
-            productImageView.bottomAnchor.constraint(equalTo: self.contentView.bottomAnchor,constant: -10),
-            productImageView.widthAnchor.constraint(equalTo: self.contentView.widthAnchor, multiplier: 0.2),
-            productImageView.heightAnchor.constraint(equalTo: productImageView.widthAnchor)
-        ])
-        NSLayoutConstraint.activate([
-            verticalStackView.leadingAnchor.constraint(equalTo: productImageView.trailingAnchor),
-            verticalStackView.topAnchor.constraint(equalTo: self.contentView.topAnchor, constant: 10),
-            verticalStackView.bottomAnchor.constraint(equalTo: self.contentView.bottomAnchor, constant: -10),
-            verticalStackView.trailingAnchor.constraint(equalTo: self.contentView.trailingAnchor, constant: -10)
-        ])
+    private func setupAddSubviewsInGridLayout() {
+        verticalStackView.alignment = .center
+        self.contentView.addSubview(verticalStackView)
+        verticalStackView.addArrangedSubview(productImageView)
+        verticalStackView.addArrangedSubview(productNameLabel)
+        verticalStackView.addArrangedSubview(productPriceLabel)
+        verticalStackView.addArrangedSubview(indicatorLabel)
+    }
+    
+    
+    func setupConstraints(in cell: KindOfCell) {
+        if cell == .listCell {
+            constraintsList = [
+                productImageView.centerYAnchor.constraint(equalTo: self.contentView.centerYAnchor),
+                productImageView.leadingAnchor.constraint(equalTo: self.contentView.leadingAnchor),
+                productImageView.topAnchor.constraint(equalTo: self.contentView.topAnchor, constant: 10),
+                productImageView.bottomAnchor.constraint(equalTo: self.contentView.bottomAnchor,constant: -10),
+                productImageView.widthAnchor.constraint(equalTo: self.contentView.widthAnchor, multiplier: 0.2),
+                productImageView.heightAnchor.constraint(equalTo: productImageView.widthAnchor),
+                
+                verticalStackView.leadingAnchor.constraint(equalTo: productImageView.trailingAnchor),
+                verticalStackView.topAnchor.constraint(equalTo: self.contentView.topAnchor, constant: 10),
+                verticalStackView.bottomAnchor.constraint(equalTo: self.contentView.bottomAnchor, constant: -10),
+                verticalStackView.trailingAnchor.constraint(equalTo: self.contentView.trailingAnchor, constant: -10)
+            ]
+        } else {
+            constraintsList = [
+                productImageView.heightAnchor.constraint(equalToConstant: 150),
+                productImageView.widthAnchor.constraint(equalToConstant: 150),
+                
+                verticalStackView.topAnchor.constraint(equalTo: self.contentView.topAnchor, constant: 10),
+                verticalStackView.leadingAnchor.constraint(equalTo: self.contentView.leadingAnchor),
+                verticalStackView.trailingAnchor.constraint(equalTo: self.contentView.trailingAnchor),
+                verticalStackView.bottomAnchor.constraint(equalTo: self.contentView.bottomAnchor, constant: -10)
+            ]
+        }
+        constraintsList?.forEach { $0.isActive = true }
     }
     
     func setupCellData(with inputData: Product) {
@@ -107,6 +129,7 @@ class ListCell: UICollectionViewCell {
         self.productNameLabel.text = inputData.name
         self.productPriceLabel.text = "\(inputData.currency) \(inputData.price)"
         setupIndicatorLabelData(stock: inputData.stock)
+        
     }
     
     private func setupIndicatorLabelData(stock: Int) {

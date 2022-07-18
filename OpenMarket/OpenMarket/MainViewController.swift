@@ -21,13 +21,13 @@ class MainViewController: UIViewController {
             guard let shouldHideListLayout = shouldHideListLayout else { return }
             print("DID TAPPED SEGMENT CONTROLLER")
             if shouldHideListLayout {
-                self.view.subviews.forEach { $0.removeFromSuperview() }
-                configureHierarchy(with: createGridLayout)
-                configureListDataSource()
+                configureDataSource()
+                dataSource?.apply(snapshot, animatingDifferences: true)
+                collectionView.setCollectionViewLayout(createGridLayout(), animated: true)
             } else {
-                self.view.subviews.forEach { $0.removeFromSuperview() }
-                configureHierarchy(with: createListLayout)
-                configureListDataSource()
+                configureDataSource()
+                dataSource?.apply(snapshot, animatingDifferences: true)
+                collectionView.setCollectionViewLayout(createListLayout(), animated: true)
             }
         }
     }
@@ -38,33 +38,38 @@ class MainViewController: UIViewController {
         segmentController.selectedSegmentIndex = 0
         return segmentController
     }()
-    
     private var collectionView = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewLayout())
-    
+    private var snapshot = NSDiffableDataSourceSnapshot<Section, Product>()
     // MARK: - View Life Cycle
     override func viewDidLoad() {
         super.viewDidLoad()
         self.view.backgroundColor = .systemBackground
         addUIComponents()
         setupSegment()
-        configureHierarchy(with: createListLayout)
-        configureListDataSource()
+        configureHierarchy()
+        configureDataSource()
+        manager.dataTask { [weak self] productList in
+            self?.snapshot.appendSections([.main])
+            self?.snapshot.appendItems(productList)
+            self?.dataSource?.apply(self!.snapshot, animatingDifferences: true)
+        }
     }
     
     private func addUIComponents() {
         self.navigationItem.titleView = segmentController
     }
     
-    @objc private func didChangeValue(segment: UISegmentedControl) {
-        self.shouldHideListLayout = segment.selectedSegmentIndex != 0
-    }
-    
     private func setupSegment() {
         didChangeValue(segment: self.segmentController)
         self.segmentController.addTarget(self, action: #selector(didChangeValue(segment:)), for: .valueChanged)
+        segmentController.layer.shadowPath = .none
+    }
+    
+    @objc private func didChangeValue(segment: UISegmentedControl) {
+        self.shouldHideListLayout = segment.selectedSegmentIndex != 0
     }
 }
-// MARK: - Modern Collection View List Style
+
 extension MainViewController {
     private func createListLayout() -> UICollectionViewLayout {
         let config = UICollectionLayoutListConfiguration(appearance: .insetGrouped)
@@ -93,14 +98,15 @@ extension MainViewController {
 
 extension MainViewController {
     
-    private func configureHierarchy(with layout: () -> UICollectionViewLayout){
-        collectionView = UICollectionView(frame: view.bounds, collectionViewLayout: layout())
+    private func configureHierarchy(){
+        collectionView.frame = view.bounds
+        collectionView.setCollectionViewLayout(createListLayout(), animated: true)
         collectionView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         self.view.addSubview(collectionView)
         collectionView.delegate = self
     }
     
-    private func configureListDataSource() {
+    private func configureDataSource() {
         guard let isGrid = shouldHideListLayout else { return }
         let cellRegistration = UICollectionView.CellRegistration<CustomCell, Product> { (cell, indexPath, product) in
             if isGrid {
@@ -115,20 +121,11 @@ extension MainViewController {
                 cell.setupConstraints(in: .listCell)
                 cell.setupCellData(with: product)
             }
-            
         }
         dataSource = UICollectionViewDiffableDataSource<Section, Product>(collectionView: collectionView) {
             (collectionView: UICollectionView, indexPath: IndexPath, identifier: Product) -> UICollectionViewCell? in
             
             return collectionView.dequeueConfiguredReusableCell(using: cellRegistration, for: indexPath, item: identifier)
-        }
-        
-        // initial data
-        manager.dataTask { [weak self] productList in
-            var snapshot = NSDiffableDataSourceSnapshot<Section, Product>()
-            snapshot.appendSections([.main])
-            snapshot.appendItems(productList)
-            self?.dataSource?.apply(snapshot, animatingDifferences: false)
         }
     }
 }

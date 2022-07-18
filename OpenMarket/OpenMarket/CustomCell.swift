@@ -74,10 +74,8 @@ class CustomCell: UICollectionViewCell {
     private func setupAddSubviewsInListLayout() {
         self.contentView.addSubview(productImageView)
         self.contentView.addSubview(verticalStackView)
-        
         horizontalStackView.addArrangedSubview(productNameLabel)
         horizontalStackView.addArrangedSubview(indicatorLabel)
-        
         verticalStackView.addArrangedSubview(horizontalStackView)
         verticalStackView.addArrangedSubview(productPriceLabel)
     }
@@ -102,7 +100,7 @@ class CustomCell: UICollectionViewCell {
                 productImageView.widthAnchor.constraint(equalTo: self.contentView.widthAnchor, multiplier: 0.2),
                 productImageView.heightAnchor.constraint(equalTo: productImageView.widthAnchor),
                 
-                verticalStackView.leadingAnchor.constraint(equalTo: productImageView.trailingAnchor),
+                verticalStackView.leadingAnchor.constraint(equalTo: productImageView.trailingAnchor, constant: 10),
                 verticalStackView.topAnchor.constraint(equalTo: self.contentView.topAnchor, constant: 10),
                 verticalStackView.bottomAnchor.constraint(equalTo: self.contentView.bottomAnchor, constant: -10),
                 verticalStackView.trailingAnchor.constraint(equalTo: self.contentView.trailingAnchor, constant: -10)
@@ -111,7 +109,6 @@ class CustomCell: UICollectionViewCell {
             constraintsList = [
                 productImageView.heightAnchor.constraint(equalToConstant: 150),
                 productImageView.widthAnchor.constraint(equalToConstant: 150),
-                
                 verticalStackView.topAnchor.constraint(equalTo: self.contentView.topAnchor, constant: 10),
                 verticalStackView.leadingAnchor.constraint(equalTo: self.contentView.leadingAnchor),
                 verticalStackView.trailingAnchor.constraint(equalTo: self.contentView.trailingAnchor),
@@ -129,7 +126,6 @@ class CustomCell: UICollectionViewCell {
         self.productNameLabel.text = inputData.name
         self.productPriceLabel.text = "\(inputData.currency) \(inputData.price)"
         setupIndicatorLabelData(stock: inputData.stock)
-        
     }
     
     private func setupIndicatorLabelData(stock: Int) {

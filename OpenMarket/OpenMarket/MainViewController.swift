@@ -65,6 +65,13 @@ class MainViewController: UIViewController {
     // MARK: - View Life Cycle
     override func viewDidLoad() {
         super.viewDidLoad()
+        do {
+            try manager.requestDataTask(components: nil) { detail in
+                detail.showDetail()
+            }
+        } catch {
+            print("ERROR TEST")
+        }
         initializeViewController()
         self.listLayout = createListLayout()
         self.gridLayout = createGridLayout()

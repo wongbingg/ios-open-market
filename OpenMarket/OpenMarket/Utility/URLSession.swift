@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import UIKit
 
 class NetworkManager {
     func dataTask(_ completion: @escaping ([Product]) -> Void ) {
@@ -34,6 +35,81 @@ class NetworkManager {
                 return
             }
             completion(fetchedData.pages)
+        }
+        dataTask.resume()
+    }
+    
+    func requestDataTask(components: [Any]?, _ completion: @escaping (ProductDetail) -> Void ) throws {
+        //post URL = API HOST + PATH
+        let config = URLSessionConfiguration.default
+        let session = URLSession(configuration: config)
+        let urlComponents = URLComponents(string: URLData.host.rawValue + URLData.registProduct.rawValue)
+        guard let url = urlComponents?.url else {
+            return
+        }
+        //post body에 들어갈 데이터 생성
+        let param = ProductRegistration(name: "포스트1", price: 50001, stock: 3, currency: Currency.krw, secret: URLData.secretKey.rawValue , descriptions: "정면사진")
+        guard let paramData = try? JSONEncoder().encode(param) else {
+            return
+        }
+        let images = [UIImage(named: "bory2")]
+        
+        // HTTP Body에 들어갈 내용 작성
+        let boundary = UUID().uuidString
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
+        request.setValue(URLData.boryIdentifier.rawValue, forHTTPHeaderField: "identifier")
+        
+        var data = Data()
+        guard let startBoundaryData = "\r\n--\(boundary)\r\n".data(using: .utf8) else {
+            return
+        }
+        
+        // params 설정
+        data.append(startBoundaryData)
+        guard let paramsAttribute = "Content-Disposition: form-data; name=\"params\"\r\n\r\n".data(using: .utf8) else {
+            return
+        }
+        data.append(paramsAttribute)
+        data.append(paramData)
+        
+        // images 설정
+        for (index, image) in images.enumerated() {
+            data.append(startBoundaryData)
+            let fileName = "bory"
+            
+            data.append("Content-Disposition: form-data; name=\"images\"; filename=\"\(fileName).png\"\r\n".data(using: .utf8)!)
+            data.append("Content-Type: image/jpeg\r\n\r\n".data(using: .utf8)!)
+            data.append((image?.jpegData(compressionQuality: 0.2))!)
+        }
+        guard let endBoundaryData = "\r\n--\(boundary)--\r\n".data(using: .utf8) else {
+            return
+        }
+        data.append(endBoundaryData)
+        
+        // 만든 data를 바디에 주입
+        request.httpBody = data
+        
+        
+        let dataTask = session.dataTask(with: request) { (data, response, error) in
+            print(String(data: data!, encoding: .utf8))
+            guard error == nil else {
+                print(error.debugDescription)
+                return
+            }
+            let successsRange = 200..<300
+            guard let statusCode = (response as? HTTPURLResponse)?.statusCode,
+                  successsRange.contains(statusCode) else {
+                return
+            }
+            guard let resultData = data,
+                  let fetchedData = decode(from: resultData, to: ProductDetail.self) else {
+                debugPrint("ERROR: FAILURE DECODING ")
+                return
+            }
+            completion(fetchedData)
         }
         dataTask.resume()
     }

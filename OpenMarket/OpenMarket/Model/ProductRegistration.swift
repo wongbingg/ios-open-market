@@ -11,6 +11,7 @@ import UIKit
 struct ProductRegistration: Codable {
     let name: String
     let price: Int
+    let discountedPrice: Int
     let stock: Int
     let currency: Currency
     let secret: String
@@ -19,6 +20,7 @@ struct ProductRegistration: Codable {
     enum CodingKeys: String, CodingKey {
         case name
         case price
+        case discountedPrice = "discounted_price"
         case stock
         case currency
         case secret

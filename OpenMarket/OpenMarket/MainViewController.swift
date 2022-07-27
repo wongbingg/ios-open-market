@@ -14,10 +14,16 @@ class MainViewController: UIViewController {
     private var gridDataSource: UICollectionViewDiffableDataSource<Section, Product>?
     private var listLayout: UICollectionViewLayout? = nil
     private var gridLayout: UICollectionViewLayout? = nil
-    
+    private var productLists: [Product] = []
     enum Section {
         case main
     }
+    lazy var refreshControl: UIRefreshControl = {
+        let refreshControl = UIRefreshControl()
+        refreshControl.addTarget(self, action: #selector(<#T##@objc method#>), for: UIControl.Event.valueChanged)
+        refreshControl.tintColor = UIColor.red
+        return refreshControl
+    }()
     
     private var shouldHideListLayout: Bool? {
         didSet {
@@ -65,13 +71,6 @@ class MainViewController: UIViewController {
     // MARK: - View Life Cycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        do {
-            try manager.requestDataTask(components: nil) { detail in
-                detail.showDetail()
-            }
-        } catch {
-            print("ERROR TEST")
-        }
         initializeViewController()
         self.listLayout = createListLayout()
         self.gridLayout = createGridLayout()
@@ -100,6 +99,20 @@ class MainViewController: UIViewController {
     
     @objc private func addButtonDidTapped() {
         print("add button tapped")
+//        do { // 게시글 POST 하기
+//            try manager.requestPost(components: nil) { detail in
+//                detail.showDetail()
+//            }
+//        } catch {
+//            print("ERROR TEST")
+//        }
+//        manager.searchSecretKey(id: 3939) { [self] (id, secretKey) in // id를 이용해 secretKey를 구한뒤, 삭제하는 로직 DELETE
+//            manager.deleteItem(id: id, secretKey: secretKey)
+//            fetchData()
+//        }
+        
+//        manager.modifyItem(id: 3939, name: "보리보리") // 올린 게시글 수정 POST
+//        fetchData()
     }
     
     private func setupSegment() {
@@ -113,6 +126,7 @@ class MainViewController: UIViewController {
     
     private func fetchData() {
         manager.dataTask { [weak self] productList in
+            self?.productLists = productList
             var snapshot = NSDiffableDataSourceSnapshot<Section, Product>()
             snapshot.appendSections([.main])
             snapshot.appendItems(productList)
@@ -200,6 +214,7 @@ extension MainViewController {
 extension MainViewController: UICollectionViewDelegate {
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         collectionView.deselectItem(at: indexPath, animated: true)
+        print(productLists[indexPath.row].id)
     }
 }
 

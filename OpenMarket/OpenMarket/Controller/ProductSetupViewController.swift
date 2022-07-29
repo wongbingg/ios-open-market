@@ -7,13 +7,14 @@
 
 import UIKit
 
-class ProductSetupViewController: UIViewController {
+class ProductSetupViewController: UIViewController , UITextFieldDelegate {
     // MARK: - Properties
     private let manager = NetworkManager.shared
     private var productSetupView: ProductSetupView?
     private var imagePicker = UIImagePickerController()
     var productId: Int?
-    var viewControllerTitle: String? 
+    var viewControllerTitle: String?
+    let fakeView = PickerImageView(frame: CGRect())
     // MARK: - Life Cycle
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -22,9 +23,16 @@ class ProductSetupViewController: UIViewController {
         productSetupView = ProductSetupView(self)
         setupKeyboard()
         setupPickerViewController()
+        productSetupView?.currencySegmentControl.addTarget(self, action: #selector(changeKeyboardType), for: .valueChanged)
+        changeKeyboardType()
+        fakeView.setFrame(at: 200)
     }
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        productSetupView?.productStockTextField.delegate = self
+        productSetupView?.productPriceTextField.delegate = self
+        productSetupView?.productNameTextField.delegate = self
+        productSetupView?.productDiscountedPriceTextField.delegate = self
         guard let productId = productId else {
             productSetupView?.horizontalStackView.addArrangedSubview(productSetupView?.addImageButton ?? UIButton())
             return // 등록인 경우
@@ -35,12 +43,31 @@ class ProductSetupViewController: UIViewController {
             }
         }
     }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        NotificationCenter.default.removeObserver(self, name: UIResponder.keyboardDidShowNotification, object: nil)
+        NotificationCenter.default.removeObserver(self, name: UIResponder.keyboardWillHideNotification, object: nil)
+    }
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        self.view.endEditing(true)
+    }
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        textField.resignFirstResponder()
+        return true
+    }
     // MARK: - @objc method
     @objc func keyboardWillAppear(_ sender: Notification) {
         print("keyboard up")
+        productSetupView?.horizontalStackView.addArrangedSubview(fakeView)
     }
     @objc func keyboardWillDisappear(_ sender: Notification){
         print("keyboard down")
+        productSetupView?.subviews.forEach({ view in
+            let imageView = view as! UIImageView
+            if imageView == fakeView {
+                imageView.isHidden = true
+            }
+        })
     }
     @objc func cancelButtonDidTapped() {
         navigationController?.popViewController(animated: true)
@@ -67,6 +94,21 @@ class ProductSetupViewController: UIViewController {
             return
         }
         self.present(imagePicker, animated: true)
+    }
+    
+    @objc func changeKeyboardType() {
+        if productSetupView?.currencySegmentControl.selectedSegmentIndex == 0 {
+            productSetupView?.productPriceTextField.resignFirstResponder()
+            productSetupView?.productDiscountedPriceTextField.resignFirstResponder()
+            productSetupView?.productPriceTextField.keyboardType = .numberPad
+            productSetupView?.productDiscountedPriceTextField.keyboardType = .numberPad
+            
+        } else {
+            productSetupView?.productPriceTextField.resignFirstResponder()
+            productSetupView?.productDiscountedPriceTextField.resignFirstResponder()
+            productSetupView?.productPriceTextField.keyboardType = .decimalPad
+            productSetupView?.productDiscountedPriceTextField.keyboardType = .decimalPad
+        }
     }
     // MARK: - ProductSetupVC - Private method
     private func createProductRegistration() -> ProductRegistration? {
@@ -109,8 +151,10 @@ class ProductSetupViewController: UIViewController {
     }
     
     private func setupKeyboard() {
-        navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .cancel, target: self, action: #selector(cancelButtonDidTapped))
-        navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(doneButtonDidTapped))
+        
+        productSetupView?.productStockTextField.keyboardType = .numberPad // 위치
+        navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .cancel, target: self, action: #selector(cancelButtonDidTapped))// 위치
+        navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(doneButtonDidTapped)) // 위치
         NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillAppear(_:)), name: UIResponder.keyboardWillShowNotification , object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillDisappear(_:)), name: UIResponder.keyboardWillHideNotification , object: nil)
     }

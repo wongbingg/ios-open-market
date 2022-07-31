@@ -9,17 +9,17 @@ import UIKit
 
 class PickerImageView: UIImageView {
 
-    override init(frame: CGRect) {
+    init(frame: CGRect, eachSide: Int) {
         super.init(frame: frame)
-        setupImageView()
+        setupImageView(at: eachSide)
     }
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     
-    private func setupImageView() {
+    private func setupImageView(at line: Int) {
         self.translatesAutoresizingMaskIntoConstraints = false
-        self.setFrame(at: 100)
+        self.setFrame(at: line)
     }
 }

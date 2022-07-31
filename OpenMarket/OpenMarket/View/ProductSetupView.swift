@@ -23,9 +23,9 @@ class ProductSetupView: UIView {
                                                        descriptionTextView])
         stackview.translatesAutoresizingMaskIntoConstraints = false
         stackview.axis = .vertical
-        stackview.distribution = .fill
-        stackview.alignment = .fill
         stackview.spacing = 10
+        stackview.layoutMargins = UIEdgeInsets(top: .zero, left: 10, bottom: .zero, right: 10)
+        stackview.isLayoutMarginsRelativeArrangement = true
         return stackview
     }()
     
@@ -38,7 +38,6 @@ class ProductSetupView: UIView {
     
     lazy var horizontalStackView: UIStackView = {
         var stackview = UIStackView()
-        //stackview.addArrangedSubview(addImageButton)
         stackview.translatesAutoresizingMaskIntoConstraints = false
         stackview.axis = .horizontal
         stackview.distribution = .fill
@@ -57,12 +56,13 @@ class ProductSetupView: UIView {
         return button
     }()
     
-    let productNameTextField: UITextField = {
+    lazy var productNameTextField: UITextField = {
         var textfield = UITextField()
         textfield.translatesAutoresizingMaskIntoConstraints = false
         textfield.placeholder = "상품명"
         textfield.setupLayer()
         textfield.addLeftPadding()
+        textfield.inputAccessoryView = accessoryView
         return textfield
     }()
     
@@ -71,18 +71,18 @@ class ProductSetupView: UIView {
                                                        currencySegmentControl])
         stackview.translatesAutoresizingMaskIntoConstraints = false
         stackview.axis = .horizontal
-        stackview.distribution = .fill
-        stackview.alignment = .fill
+        stackview.distribution = .fillEqually
         stackview.spacing = 10
         return stackview
     }()
     
-    let productPriceTextField: UITextField = {
+    lazy var productPriceTextField: UITextField = {
         var textfield = UITextField()
         textfield.translatesAutoresizingMaskIntoConstraints = false
         textfield.placeholder = "상품가격"
         textfield.setupLayer()
         textfield.addLeftPadding()
+        textfield.inputAccessoryView = accessoryView
         return textfield
     }()
     
@@ -93,30 +93,48 @@ class ProductSetupView: UIView {
         return segment
     }()
     
-    let productDiscountedPriceTextField: UITextField = {
+    lazy var productDiscountedPriceTextField: UITextField = {
         var textfield = UITextField()
         textfield.translatesAutoresizingMaskIntoConstraints = false
         textfield.placeholder = "할인금액"
         textfield.setupLayer()
         textfield.addLeftPadding()
+        textfield.inputAccessoryView = accessoryView
         return textfield
     }()
     
-    let productStockTextField: UITextField = {
+    lazy var productStockTextField: UITextField = {
         var textfield = UITextField()
         textfield.translatesAutoresizingMaskIntoConstraints = false
         textfield.placeholder = "재고수량"
         textfield.setupLayer()
         textfield.addLeftPadding()
+        textfield.inputAccessoryView = accessoryView
         return textfield
     }()
     
-    let descriptionTextView: UITextView = {
+    
+    lazy var descriptionTextView: UITextView = {
         var textview = UITextView()
         textview.translatesAutoresizingMaskIntoConstraints = false
-        textview.text = "asdfasdfasdf"
+        textview.font = UIFont.preferredFont(forTextStyle: .title2)
         textview.isScrollEnabled = false
+        textview.backgroundColor = .lightGray
+        textview.inputAccessoryView = accessoryView
         return textview
+    }()
+    
+    let accessoryView: UIView = {
+        return UIView(frame: CGRect(x: 0.0, y: 0.0, width: UIScreen.main.bounds.width, height: 50))
+    }()
+    
+    let confirmButton: UIButton = {
+        let button = UIButton()
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.setTitle("닫기", for: .normal)
+        button.setTitleColor(UIColor.black, for: .normal)
+        button.backgroundColor = .systemGray6
+        return button
     }()
     
     private var rootViewController: UIViewController?
@@ -136,6 +154,7 @@ class ProductSetupView: UIView {
         rootViewController.view.addSubview(mainScrollView)
         mainScrollView.addSubview(mainStackView)
         horizontalScrollView.addSubview(horizontalStackView)
+        accessoryView.addSubview(confirmButton)
     }
     
     private func setupConstraints(_ rootViewController: UIViewController) {
@@ -155,16 +174,15 @@ class ProductSetupView: UIView {
             mainStackViewHeightAnchor,
             mainStackView.topAnchor.constraint(equalTo: mainScrollView.contentLayoutGuide.topAnchor),
             mainStackView.bottomAnchor.constraint(equalTo: mainScrollView.contentLayoutGuide.bottomAnchor),
-            mainStackView.leadingAnchor.constraint(equalTo: mainScrollView.contentLayoutGuide.leadingAnchor, constant: 10),
-            mainStackView.trailingAnchor.constraint(equalTo: mainScrollView.contentLayoutGuide.trailingAnchor, constant: -10),
-            mainStackView.widthAnchor.constraint(equalTo: mainScrollView.widthAnchor, constant: -20)
+            mainStackView.leadingAnchor.constraint(equalTo: mainScrollView.leadingAnchor),
+            mainStackView.trailingAnchor.constraint(equalTo: mainScrollView.trailingAnchor),
+            mainStackView.widthAnchor.constraint(equalTo: mainScrollView.widthAnchor)
         ])
         NSLayoutConstraint.activate([
             horizontalScrollView.heightAnchor.constraint(equalToConstant: 100),
             horizontalScrollView.topAnchor.constraint(equalTo: mainStackView.topAnchor),
-            horizontalScrollView.bottomAnchor.constraint(equalTo: productNameTextField.topAnchor, constant: -10),
-            horizontalScrollView.leadingAnchor.constraint(equalTo: mainStackView.leadingAnchor),
-            horizontalScrollView.trailingAnchor.constraint(equalTo: mainStackView.trailingAnchor)
+            horizontalScrollView.leadingAnchor.constraint(equalTo: mainStackView.layoutMarginsGuide.leadingAnchor),
+            horizontalScrollView.trailingAnchor.constraint(equalTo: mainStackView.layoutMarginsGuide.trailingAnchor)
         ])
         NSLayoutConstraint.activate([
             horizontalStackViewWidthAnchor,
@@ -177,9 +195,21 @@ class ProductSetupView: UIView {
         NSLayoutConstraint.activate([
             productNameTextField.heightAnchor.constraint(equalToConstant: 35),
             productPriceTextField.heightAnchor.constraint(equalToConstant: 35),
-            productPriceTextField.widthAnchor.constraint(equalTo: priceStackView.widthAnchor, multiplier: 0.7),
             productDiscountedPriceTextField.heightAnchor.constraint(equalToConstant: 35),
             productStockTextField.heightAnchor.constraint(equalToConstant: 35)
         ])
+//        NSLayoutConstraint.activate([
+//            descriptionTextView.heightAnchor.constraint(greaterThanOrEqualToConstant: 300)
+//        ])
+        guard let confirmButtonSuperview = confirmButton.superview else { return }
+        NSLayoutConstraint.activate([
+            confirmButton.leadingAnchor.constraint(equalTo: confirmButtonSuperview.leadingAnchor, constant: 350),
+            confirmButton.trailingAnchor.constraint(equalTo: confirmButtonSuperview.trailingAnchor),
+            confirmButton.bottomAnchor.constraint(equalTo: confirmButtonSuperview.bottomAnchor),
+            confirmButton.heightAnchor.constraint(equalToConstant: 30)
+        ])
+//        NSLayoutConstraint.activate([ // ambiguos scrollable size 오류때문에 추가
+//            mainScrollView.heightAnchor.constraint(equalTo: mainStackView.heightAnchor)
+//        ])
     }
 }

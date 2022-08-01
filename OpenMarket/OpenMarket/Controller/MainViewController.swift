@@ -16,6 +16,7 @@ final class MainViewController: UIViewController {
     private var gridLayout: UICollectionViewLayout? = nil
     private var productLists: [Product] = []
     private var currentMaximumPage = 1
+    private var refresher: UIRefreshControl!
     enum Section {
         case main
     }
@@ -63,6 +64,7 @@ final class MainViewController: UIViewController {
         return activityIndicator
     }()
     // MARK: - View Life Cycle
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         initializeViewController()
@@ -73,6 +75,7 @@ final class MainViewController: UIViewController {
         configureListDataSource()
         configureGridDataSource()
         configureHierarchy()
+        setupRefreshController()
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -194,6 +197,25 @@ extension MainViewController {
         collectionView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         collectionView.dataSource = listDataSource
         collectionView.delegate = self
+    }
+    
+    private func setupRefreshController() {
+        self.refresher = UIRefreshControl()
+        self.collectionView.alwaysBounceVertical = true
+        self.refresher.tintColor = UIColor.red
+        self.refresher.addTarget(self, action: #selector(loadData), for: .valueChanged)
+        self.collectionView.refreshControl = refresher
+    }
+    
+    @objc private func loadData() {
+        self.collectionView.refreshControl?.beginRefreshing()
+        fetchData()
+        stopRefresher()
+    }
+    
+    private func stopRefresher() {
+        guard let refresh = self.collectionView.refreshControl else { print("refreshcontrol이 없다") ; return }
+        refresh.endRefreshing()
     }
 }
 // MARK: - Modern Collection View Delegate

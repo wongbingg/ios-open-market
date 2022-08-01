@@ -39,7 +39,6 @@ final class ListCell: UICollectionViewCell {
         label.font = UIFont.preferredFont(forTextStyle: .title2)
         label.numberOfLines = 0
         label.text = "Mac mini"
-        label.setContentHuggingPriority(UILayoutPriority(251), for: .horizontal)
         return label
     }()
     
@@ -78,7 +77,6 @@ final class ListCell: UICollectionViewCell {
         label.textAlignment = .right
         label.textColor = .lightGray
         label.sizeToFit()
-        label.setContentCompressionResistancePriority(UILayoutPriority(800), for: .horizontal)
         return label
     }()
     // MARK: - Cell Initailize

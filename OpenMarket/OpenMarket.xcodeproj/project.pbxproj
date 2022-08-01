@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		451486D62897AEC60053AF77 /* ProductDetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 451486D52897AEC60053AF77 /* ProductDetailViewController.swift */; };
 		453EAC4D287C048300EFCBB9 /* Product.swift in Sources */ = {isa = PBXBuildFile; fileRef = 453EAC4C287C048300EFCBB9 /* Product.swift */; };
 		453EAC4F287C050100EFCBB9 /* Currency.swift in Sources */ = {isa = PBXBuildFile; fileRef = 453EAC4E287C050100EFCBB9 /* Currency.swift */; };
 		453EAC58287C341400EFCBB9 /* DataFetchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 453EAC57287C341400EFCBB9 /* DataFetchTests.swift */; };
@@ -50,6 +51,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		451486D52897AEC60053AF77 /* ProductDetailViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProductDetailViewController.swift; sourceTree = "<group>"; };
 		453EAC4C287C048300EFCBB9 /* Product.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Product.swift; sourceTree = "<group>"; };
 		453EAC4E287C050100EFCBB9 /* Currency.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Currency.swift; sourceTree = "<group>"; };
 		453EAC55287C341400EFCBB9 /* DataFetchTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = DataFetchTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -143,6 +145,7 @@
 			children = (
 				45B7A50C287FF60500FCB69F /* MainViewController.swift */,
 				AFBC2FD62892668800E81A2F /* ProductSetupViewController.swift */,
+				451486D52897AEC60053AF77 /* ProductDetailViewController.swift */,
 			);
 			path = Controller;
 			sourceTree = "<group>";
@@ -331,6 +334,7 @@
 				453EAC64287C7BFB00EFCBB9 /* URLSession.swift in Sources */,
 				453EAC4F287C050100EFCBB9 /* Currency.swift in Sources */,
 				AF2257762889393700C5CE97 /* UIImageView+Extensions.swift in Sources */,
+				451486D62897AEC60053AF77 /* ProductDetailViewController.swift in Sources */,
 				C70FB0FB25BEF61C00C9924E /* AppDelegate.swift in Sources */,
 				C70FB0FD25BEF61C00C9924E /* SceneDelegate.swift in Sources */,
 				AFBC2FD72892668800E81A2F /* ProductSetupViewController.swift in Sources */,

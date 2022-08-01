@@ -115,12 +115,13 @@ final class MainViewController: UIViewController {
     }
     
     private func fetchData() {
-        manager.requestProductPage(at: currentMaximumPage) { [weak self] productList in
-            self?.productLists = productList
+        manager.requestProductPage(at: currentMaximumPage) { [weak self] requestedProductList in
+            self?.productLists += requestedProductList
+            
             var snapshot = NSDiffableDataSourceSnapshot<Section, Product>()
             snapshot.appendSections([.main])
-            snapshot.appendItems(productList)
-            self?.gridDataSource?.apply(snapshot, animatingDifferences: false)
+            snapshot.appendItems(self?.productLists ?? [Product]())
+            self?.gridDataSource?.apply(snapshot, animatingDifferences: false) // 먼저 적용되는 레이아웃은 페이징이 됨
             self?.listDataSource?.apply(snapshot, animatingDifferences: false)
             DispatchQueue.main.async {
                 self?.activitiIndicator.stopAnimating()
@@ -128,6 +129,21 @@ final class MainViewController: UIViewController {
             }
         }
     }
+    
+//    private func addData() {
+//        manager.requestProductPage(at: currentMaximumPage) { [weak self] productList in
+//            self?.productLists += productList
+//            var snapshot = NSDiffableDataSourceSnapshot<Section, Product>()
+//            snapshot.appendSections([.main])
+//            snapshot.appendItems(self?.productList)
+//            self?.gridDataSource?.apply(snapshot, animatingDifferences: false)
+//            self?.listDataSource?.apply(snapshot, animatingDifferences: false)
+//            DispatchQueue.main.async {
+//                self?.activitiIndicator.stopAnimating()
+//                self?.collectionView.alpha = 1
+//            }
+//        }
+//    }
 }
 // MARK: - Modern Collection Create Layout
 extension MainViewController {
@@ -217,9 +233,28 @@ extension MainViewController {
         guard let refresh = self.collectionView.refreshControl else { print("refreshcontrol이 없다") ; return }
         refresh.endRefreshing()
     }
+    
+    func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
+        if collectionView.contentOffset.y > collectionView.contentSize.height - collectionView.bounds.size.height {
+            print("앙 바닥에 닿았당")
+            DispatchQueue.main.async { [weak self] in
+                print("다음 페이지")
+                self?.currentMaximumPage += 1
+                self?.fetchData()
+                self?.collectionView.reloadData()
+            }
+        }
+    }
+    func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
+    
+    }
 }
 // MARK: - Modern Collection View Delegate
 extension MainViewController: UICollectionViewDelegate {
+//    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+//        return UICollectionViewCell()
+//    }
+    
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         collectionView.deselectItem(at: indexPath, animated: true)
         let prodcutDetailVC = ProductDetailViewController()
@@ -228,6 +263,10 @@ extension MainViewController: UICollectionViewDelegate {
         print("\(productLists[indexPath.row].id) - \(productLists[indexPath.row].name) is tapped")
         navigationController?.pushViewController(prodcutDetailVC, animated: true)
     }
+    
+//    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+//        return self.productLists.count
+//    }
 }
 
 

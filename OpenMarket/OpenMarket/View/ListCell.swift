@@ -9,6 +9,13 @@ import UIKit
 
 final class ListCell: UICollectionViewCell {
     // MARK: - Cell UIComponents
+    private let mainStackView: UIStackView = {
+        let stackview = UIStackView()
+        stackview.translatesAutoresizingMaskIntoConstraints = false
+        stackview.axis = .horizontal
+        return stackview
+    }()
+    
     private let productImageView: UIImageView = {
         let imageView = UIImageView()
         imageView.translatesAutoresizingMaskIntoConstraints = false
@@ -24,12 +31,18 @@ final class ListCell: UICollectionViewCell {
         return stackview
     }()
     
-    private let upperHorizontalStackView: UIStackView = {
+    private let upperStackView: UIStackView = {
         let stackview = UIStackView()
         stackview.translatesAutoresizingMaskIntoConstraints = false
         stackview.axis = .horizontal
-        stackview.alignment = .fill
-        stackview.distribution = .equalSpacing
+        return stackview
+    }()
+    
+    private let priceStackView: UIStackView = {
+        let stackview = UIStackView()
+        stackview.translatesAutoresizingMaskIntoConstraints = false
+        stackview.axis = .horizontal
+        stackview.alignment = .center
         return stackview
     }()
     
@@ -40,15 +53,6 @@ final class ListCell: UICollectionViewCell {
         label.numberOfLines = 0
         label.text = "Mac mini"
         return label
-    }()
-    
-    private let lowerHorizontalStackView: UIStackView = {
-        let stackView = UIStackView()
-        stackView.translatesAutoresizingMaskIntoConstraints = false
-        stackView.axis = .horizontal
-        stackView.alignment = .fill
-        stackView.distribution = .fill
-        return stackView
     }()
     
     private let productBargainPriceLabel: UILabel = {
@@ -76,53 +80,94 @@ final class ListCell: UICollectionViewCell {
         label.translatesAutoresizingMaskIntoConstraints = false
         label.textAlignment = .right
         label.textColor = .lightGray
+//        label.setContentCompressionResistancePriority(UILayoutPriority(800), for: .horizontal)
         label.sizeToFit()
         return label
     }()
+    
+    lazy var listCellAutoLayoutConstraints: [NSLayoutConstraint] = [
+        mainStackView.topAnchor.constraint(equalTo: contentView.topAnchor),
+        mainStackView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
+        mainStackView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
+        mainStackView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
+        mainStackView.widthAnchor.constraint(equalTo: contentView.widthAnchor),
+//        productImageView.centerYAnchor.constraint(equalTo: mainStackView.centerYAnchor),
+        productImageView.widthAnchor.constraint(equalTo: mainStackView.widthAnchor, multiplier: 0.2),
+        productImageView.heightAnchor.constraint(equalTo: self.heightAnchor),
+//        firstStackView.leadingAnchor.constraint(equalTo: productImageView.trailingAnchor, constant: 10),
+//        firstStackView.topAnchor.constraint(equalTo: mainStackView.topAnchor, constant: 5),
+//        firstStackView.bottomAnchor.constraint(equalTo: mainStackView.bottomAnchor, constant: -5),
+//        firstStackView.trailingAnchor.constraint(equalTo: mainStackView.trailingAnchor, constant: -10)
+    ]
+    
+    lazy var gridCellAutoLayoutConstraints: [NSLayoutConstraint] = [
+        productImageView.heightAnchor.constraint(equalTo:self.contentView.heightAnchor, multiplier: 0.6),
+//        productImageView.heightAnchor.constraint(equalTo: self.productImageView.widthAnchor),
+        mainStackView.topAnchor.constraint(equalTo: self.contentView.topAnchor),
+        mainStackView.leadingAnchor.constraint(equalTo: self.contentView.leadingAnchor),
+        mainStackView.trailingAnchor.constraint(equalTo: self.contentView.trailingAnchor),
+        mainStackView.bottomAnchor.constraint(equalTo: self.contentView.bottomAnchor)
+    ]
     // MARK: - Cell Initailize
     override init(frame: CGRect) {
         super.init(frame: frame)
-        setupAddSubviews()
-        setupConstraints()
-        setupLayer()
+        self.contentView.addSubview(mainStackView)
+        setupAddSubviewsList()
+        setupConstraints(style: .list)
+        setupLayer(style: .list)
     }
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     // MARK: - Cell Setup Method
-    private func setupAddSubviews() {
-        self.contentView.addSubview(productImageView)
-        self.contentView.addSubview(verticalStackView)
+    private func setupAddSubviewsList() {
+        mainStackView.addArrangedSubview(productImageView)
+        mainStackView.addArrangedSubview(verticalStackView)
         
-        verticalStackView.addArrangedSubview(upperHorizontalStackView)
-        verticalStackView.addArrangedSubview(lowerHorizontalStackView)
+        verticalStackView.addArrangedSubview(upperStackView)
+        verticalStackView.addArrangedSubview(priceStackView)
         
-        upperHorizontalStackView.addArrangedSubview(productNameLabel)
-        upperHorizontalStackView.addArrangedSubview(indicatorLabel)
+        upperStackView.addArrangedSubview(productNameLabel)
+        upperStackView.addArrangedSubview(indicatorLabel)
         
-        lowerHorizontalStackView.addArrangedSubview(productPriceLabel)
-        lowerHorizontalStackView.addArrangedSubview(productBargainPriceLabel)
+        priceStackView.addArrangedSubview(productPriceLabel)
+        priceStackView.addArrangedSubview(productBargainPriceLabel)
     }
     
-    private func setupConstraints() {
-        NSLayoutConstraint.activate([
-            productImageView.centerYAnchor.constraint(equalTo: self.contentView.centerYAnchor),
-            productImageView.leadingAnchor.constraint(equalTo: self.contentView.leadingAnchor),
-            productImageView.widthAnchor.constraint(equalTo: self.contentView.widthAnchor, multiplier: 0.2),
-            productImageView.heightAnchor.constraint(equalTo: self.heightAnchor)
-        ])
-        NSLayoutConstraint.activate([
-            verticalStackView.leadingAnchor.constraint(equalTo: productImageView.trailingAnchor, constant: 10),
-            verticalStackView.topAnchor.constraint(equalTo: self.contentView.topAnchor, constant: 5),
-            verticalStackView.bottomAnchor.constraint(equalTo: self.contentView.bottomAnchor, constant: -5),
-            verticalStackView.trailingAnchor.constraint(equalTo: self.contentView.trailingAnchor, constant: -10)
-        ])
+    private func setupAddSubviewsGrid() {
+        mainStackView.addArrangedSubview(productImageView)
+        mainStackView.addArrangedSubview(productNameLabel)
+        mainStackView.addArrangedSubview(priceStackView)
+        mainStackView.addArrangedSubview(indicatorLabel)
     }
     
-    private func setupLayer() {
-        self.layer.borderColor = UIColor.lightGray.cgColor
-        self.layer.borderWidth = 0.5
+    private func setupConstraints(style: CellStyle) {
+        switch style  {
+        case .list:
+            NSLayoutConstraint.deactivate(gridCellAutoLayoutConstraints)
+            NSLayoutConstraint.activate(listCellAutoLayoutConstraints)
+            mainStackView.distribution = .fill
+        case .grid:
+            NSLayoutConstraint.deactivate(listCellAutoLayoutConstraints)
+            NSLayoutConstraint.activate(gridCellAutoLayoutConstraints)
+            mainStackView.distribution = .equalSpacing
+        }
+    }
+    
+    private func setupLayer(style: CellStyle) {
+        self.layer.borderColor = nil
+        self.layer.borderWidth = .nan
+        self.layer.cornerRadius = .nan
+        switch style {
+        case .list:
+            self.layer.borderColor = UIColor.lightGray.cgColor
+            self.layer.borderWidth = 0.5
+        case .grid:
+            self.layer.borderColor = UIColor.lightGray.cgColor
+            self.layer.borderWidth = 2
+            self.layer.cornerRadius = 12
+        }
     }
     
     func setup(with inputData: Product) {
@@ -133,9 +178,45 @@ final class ListCell: UICollectionViewCell {
                         bargainPrice: inputData.bargainPrice
         )
         setupIndicatorLabelData(stock: inputData.stock)
-        self.productImageView.setContentCompressionResistancePriority(UILayoutPriority(1000), for: .vertical)
+//        self.productImageView.setContentCompressionResistancePriority(UILayoutPriority(1000), for: .vertical)
     }
     
+    func changeStyle(to cellStyle: CellStyle) {
+        switch cellStyle {
+        case .list:
+            mainStackView.axis = .horizontal
+            priceStackView.axis = .horizontal
+            mainStackView.arrangedSubviews.forEach { view in
+                view.removeFromSuperview()
+            }
+            setupAddSubviewsList()
+            setupConstraints(style: .list)
+            setupLayer(style: .list)
+        case .grid:
+            mainStackView.axis = .vertical
+            mainStackView.alignment = .center
+
+            priceStackView.axis = .vertical
+            mainStackView.arrangedSubviews.forEach { view in
+                view.removeFromSuperview()
+            }
+            setupAddSubviewsGrid()
+            setupConstraints(style: .grid)
+            setupLayer(style: .grid)
+        }
+    }
+    
+    override func prepareForReuse() {
+        self.indicatorLabel.textColor = nil
+        self.productImageView.image = nil
+        self.productPriceLabel.textColor = .lightGray
+        self.productPriceLabel.attributedText = nil
+        self.productBargainPriceLabel.isHidden = false
+        self.mainStackView.alignment = .fill
+    }
+}
+
+extension ListCell {
     private func setupPriceLabel(currency: Currency, price: Double, bargainPrice: Double) {
         let upperCurreny = currency.rawValue.uppercased()
         if price == bargainPrice {
@@ -169,13 +250,5 @@ final class ListCell: UICollectionViewCell {
         attriubutedString.append(NSAttributedString(attachment: chevronAttachment))
         
         self.indicatorLabel.attributedText = attriubutedString
-    }
-    
-    override func prepareForReuse() {
-        self.indicatorLabel.textColor = nil
-        self.productImageView.image = nil
-        self.productPriceLabel.textColor = .lightGray
-        self.productPriceLabel.attributedText = nil
-        self.productBargainPriceLabel.isHidden = false
     }
 }

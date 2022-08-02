@@ -11,7 +11,6 @@ final class MainViewController: UIViewController {
     private let manager = NetworkManager.shared
     private var collectionView = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewLayout())
     private var listDataSource: UICollectionViewDiffableDataSource<Section, Product>?
-    private var gridDataSource: UICollectionViewDiffableDataSource<Section, Product>?
     private var listLayout: UICollectionViewLayout? = nil
     private var gridLayout: UICollectionViewLayout? = nil
     private var productLists: [Product] = []
@@ -29,14 +28,19 @@ final class MainViewController: UIViewController {
                 guard let gridLayout = gridLayout else {
                     return
                 }
-                collectionView.dataSource = gridDataSource
+                let cells = collectionView.visibleCells.compactMap { $0 as? ListCell}
+                cells.forEach { cell in
+                    cell.changeStyle(to: .grid)
+                }
                 collectionView.setCollectionViewLayout(gridLayout, animated: true)
             } else {
-                
                 guard let listLayout = listLayout else {
                     return
                 }
-                collectionView.dataSource = listDataSource
+                let cells = collectionView.visibleCells.compactMap { $0 as? ListCell}
+                cells.forEach { cell in
+                    cell.changeStyle(to: .list)
+                }
                 collectionView.setCollectionViewLayout(listLayout, animated: true)
             }
         }
@@ -73,7 +77,6 @@ final class MainViewController: UIViewController {
         addUIComponents()
         setupSegment()
         configureListDataSource()
-        configureGridDataSource()
         configureHierarchy()
         setupRefreshController()
     }
@@ -121,8 +124,8 @@ final class MainViewController: UIViewController {
             var snapshot = NSDiffableDataSourceSnapshot<Section, Product>()
             snapshot.appendSections([.main])
             snapshot.appendItems(self?.productLists ?? [Product]())
-            self?.gridDataSource?.apply(snapshot, animatingDifferences: false) // 먼저 적용되는 레이아웃은 페이징이 됨
             self?.listDataSource?.apply(snapshot, animatingDifferences: false)
+            //            self?.gridDataSource?.apply(snapshot, animatingDifferences: false) // 먼저 적용되는 레이아웃은 페이징이 됨
             DispatchQueue.main.async {
                 self?.activitiIndicator.stopAnimating()
                 self?.collectionView.alpha = 1
@@ -130,20 +133,20 @@ final class MainViewController: UIViewController {
         }
     }
     
-//    private func addData() {
-//        manager.requestProductPage(at: currentMaximumPage) { [weak self] productList in
-//            self?.productLists += productList
-//            var snapshot = NSDiffableDataSourceSnapshot<Section, Product>()
-//            snapshot.appendSections([.main])
-//            snapshot.appendItems(self?.productList)
-//            self?.gridDataSource?.apply(snapshot, animatingDifferences: false)
-//            self?.listDataSource?.apply(snapshot, animatingDifferences: false)
-//            DispatchQueue.main.async {
-//                self?.activitiIndicator.stopAnimating()
-//                self?.collectionView.alpha = 1
-//            }
-//        }
-//    }
+    //    private func addData() {
+    //        manager.requestProductPage(at: currentMaximumPage) { [weak self] productList in
+    //            self?.productLists += productList
+    //            var snapshot = NSDiffableDataSourceSnapshot<Section, Product>()
+    //            snapshot.appendSections([.main])
+    //            snapshot.appendItems(self?.productList)
+    //            self?.gridDataSource?.apply(snapshot, animatingDifferences: false)
+    //            self?.listDataSource?.apply(snapshot, animatingDifferences: false)
+    //            DispatchQueue.main.async {
+    //                self?.activitiIndicator.stopAnimating()
+    //                self?.collectionView.alpha = 1
+    //            }
+    //        }
+    //    }
 }
 // MARK: - Modern Collection Create Layout
 extension MainViewController {
@@ -153,7 +156,9 @@ extension MainViewController {
         let item = NSCollectionLayoutItem(layoutSize: itemSize)
         
         let groupSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
-                                               heightDimension: .absolute(70))
+                                               heightDimension: .fractionalHeight(0.08))
+//        let groupSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
+//                                               heightDimension: .absolute(70))
         let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize, subitem: item, count: 1)
         
         let section = NSCollectionLayoutSection(group: group)
@@ -194,16 +199,6 @@ extension MainViewController {
         }
     }
     
-    private func configureGridDataSource() {
-        let cellRegistration = UICollectionView.CellRegistration<GridCell, Product> { (cell, indexPath, product) in
-            cell.setup(with: product)
-        }
-        gridDataSource = UICollectionViewDiffableDataSource<Section, Product>(collectionView: collectionView) {
-            (collectionView: UICollectionView, indexPath: IndexPath, identifier: Product) -> UICollectionViewCell? in
-            return collectionView.dequeueConfiguredReusableCell(using: cellRegistration, for: indexPath, item: identifier)
-        }
-    }
-    
     private func configureHierarchy() {
         collectionView.frame = view.bounds
         guard let listLayout = listLayout else {
@@ -224,9 +219,9 @@ extension MainViewController {
     }
     
     @objc private func loadData() {
-        self.collectionView.refreshControl?.beginRefreshing()
-        fetchData()
-        stopRefresher()
+        //        self.collectionView.refreshControl?.beginRefreshing()
+        //        fetchData()
+        //        stopRefresher()
     }
     
     private func stopRefresher() {
@@ -235,38 +230,53 @@ extension MainViewController {
     }
     
     func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
-        if collectionView.contentOffset.y > collectionView.contentSize.height - collectionView.bounds.size.height {
-            print("앙 바닥에 닿았당")
-            DispatchQueue.main.async { [weak self] in
-                print("다음 페이지")
-                self?.currentMaximumPage += 1
-                self?.fetchData()
-                self?.collectionView.reloadData()
-            }
-        }
+                if collectionView.contentOffset.y > collectionView.contentSize.height - collectionView.bounds.size.height {
+                    print("앙 바닥에 닿았당")
+                    DispatchQueue.main.async { [weak self] in
+                        print("다음 페이지")
+                        self?.currentMaximumPage += 1
+                        self?.fetchData()
+                        self?.collectionView.reloadData()
+                    }
+                }
     }
     func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
-    
+        
+    }
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        guard let shouldHiseListLayout = shouldHideListLayout else { return }
+        if shouldHiseListLayout {
+            let cells = self.collectionView.visibleCells.compactMap { $0 as? ListCell}
+            cells.forEach { cell in
+                cell.changeStyle(to: .grid)
+            }
+
+        } else {
+            let cells = self.collectionView.visibleCells.compactMap { $0 as? ListCell}
+            cells.forEach { cell in
+                cell.changeStyle(to: .list)
+            }
+        }
     }
 }
 // MARK: - Modern Collection View Delegate
 extension MainViewController: UICollectionViewDelegate {
-//    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-//        return UICollectionViewCell()
-//    }
+    //    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+    //        return UICollectionViewCell()
+    //    }
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         collectionView.deselectItem(at: indexPath, animated: true)
-        let prodcutDetailVC = ProductDetailViewController()
-        prodcutDetailVC.productId = productLists[indexPath.row].id
-        prodcutDetailVC.viewControllerTitle = "상품 수정"
-        print("\(productLists[indexPath.row].id) - \(productLists[indexPath.row].name) is tapped")
-        navigationController?.pushViewController(prodcutDetailVC, animated: true)
+                let prodcutDetailVC = ProductDetailViewController()
+                prodcutDetailVC.productId = productLists[indexPath.row].id
+                prodcutDetailVC.viewControllerTitle = "상품 수정"
+                print("\(productLists[indexPath.row].id) - \(productLists[indexPath.row].name) is tapped")
+                navigationController?.pushViewController(prodcutDetailVC, animated: true)
     }
     
-//    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-//        return self.productLists.count
-//    }
+    //    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+    //        return self.productLists.count
+    //    }
 }
 
 

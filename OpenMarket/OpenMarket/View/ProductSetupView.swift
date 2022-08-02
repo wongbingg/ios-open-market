@@ -210,7 +210,6 @@ final class ProductSetupView: UIView {
     }
     
     private func keyboardTypeSetup() {
-//        productNameTextField.keyboardType = .default
         productPriceTextField.keyboardType = .numberPad
         productDiscountedPriceTextField.keyboardType = .numberPad
         productStockTextField.keyboardType = .numberPad

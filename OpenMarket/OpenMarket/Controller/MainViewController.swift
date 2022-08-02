@@ -79,11 +79,12 @@ final class MainViewController: UIViewController {
         configureListDataSource()
         configureHierarchy()
         setupRefreshController()
+        fetchData()
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        fetchData()
+        
     }
     // MARK: - Main View Controller Method
     private func initializeViewController() {
@@ -157,8 +158,8 @@ extension MainViewController {
         
         let groupSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
                                                heightDimension: .fractionalHeight(0.08))
-//        let groupSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
-//                                               heightDimension: .absolute(70))
+        //        let groupSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
+        //                                               heightDimension: .absolute(70))
         let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize, subitem: item, count: 1)
         
         let section = NSCollectionLayoutSection(group: group)
@@ -219,26 +220,29 @@ extension MainViewController {
     }
     
     @objc private func loadData() {
-        //        self.collectionView.refreshControl?.beginRefreshing()
-        //        fetchData()
-        //        stopRefresher()
+        self.collectionView.refreshControl?.beginRefreshing()
+        productLists = []
+        currentMaximumPage = 1
+        fetchData()
+        stopRefresher()
     }
     
     private func stopRefresher() {
-        guard let refresh = self.collectionView.refreshControl else { print("refreshcontrol이 없다") ; return }
-        refresh.endRefreshing()
+        DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 0.7) {
+            self.refresher.endRefreshing()
+        }
     }
     
     func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
-                if collectionView.contentOffset.y > collectionView.contentSize.height - collectionView.bounds.size.height {
-                    print("앙 바닥에 닿았당")
-                    DispatchQueue.main.async { [weak self] in
-                        print("다음 페이지")
-                        self?.currentMaximumPage += 1
-                        self?.fetchData()
-                        self?.collectionView.reloadData()
-                    }
-                }
+        if collectionView.contentOffset.y > collectionView.contentSize.height - collectionView.bounds.size.height {
+            print("앙 바닥에 닿았당")
+            DispatchQueue.main.async { [weak self] in
+                print("다음 페이지")
+                self?.currentMaximumPage += 1
+                self?.fetchData()
+                self?.collectionView.reloadData()
+            }
+        }
     }
     func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
         
@@ -250,7 +254,7 @@ extension MainViewController {
             cells.forEach { cell in
                 cell.changeStyle(to: .grid)
             }
-
+            
         } else {
             let cells = self.collectionView.visibleCells.compactMap { $0 as? ListCell}
             cells.forEach { cell in
@@ -267,11 +271,11 @@ extension MainViewController: UICollectionViewDelegate {
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         collectionView.deselectItem(at: indexPath, animated: true)
-                let prodcutDetailVC = ProductDetailViewController()
-                prodcutDetailVC.productId = productLists[indexPath.row].id
-                prodcutDetailVC.viewControllerTitle = "상품 수정"
-                print("\(productLists[indexPath.row].id) - \(productLists[indexPath.row].name) is tapped")
-                navigationController?.pushViewController(prodcutDetailVC, animated: true)
+        let prodcutDetailVC = ProductDetailViewController()
+        prodcutDetailVC.productId = productLists[indexPath.row].id
+        prodcutDetailVC.viewControllerTitle = "상품 수정"
+        print("\(productLists[indexPath.row].id) - \(productLists[indexPath.row].name) is tapped")
+        navigationController?.pushViewController(prodcutDetailVC, animated: true)
     }
     
     //    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {

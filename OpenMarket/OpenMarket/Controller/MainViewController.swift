@@ -126,28 +126,12 @@ final class MainViewController: UIViewController {
             snapshot.appendSections([.main])
             snapshot.appendItems(self?.productLists ?? [Product]())
             self?.listDataSource?.apply(snapshot, animatingDifferences: false)
-            //            self?.gridDataSource?.apply(snapshot, animatingDifferences: false) // 먼저 적용되는 레이아웃은 페이징이 됨
             DispatchQueue.main.async {
                 self?.activitiIndicator.stopAnimating()
                 self?.collectionView.alpha = 1
             }
         }
     }
-    
-    //    private func addData() {
-    //        manager.requestProductPage(at: currentMaximumPage) { [weak self] productList in
-    //            self?.productLists += productList
-    //            var snapshot = NSDiffableDataSourceSnapshot<Section, Product>()
-    //            snapshot.appendSections([.main])
-    //            snapshot.appendItems(self?.productList)
-    //            self?.gridDataSource?.apply(snapshot, animatingDifferences: false)
-    //            self?.listDataSource?.apply(snapshot, animatingDifferences: false)
-    //            DispatchQueue.main.async {
-    //                self?.activitiIndicator.stopAnimating()
-    //                self?.collectionView.alpha = 1
-    //            }
-    //        }
-    //    }
 }
 // MARK: - Modern Collection Create Layout
 extension MainViewController {
@@ -175,7 +159,7 @@ extension MainViewController {
         let item = NSCollectionLayoutItem(layoutSize: itemSize)
         
         let groupSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
-                                               heightDimension: .absolute(250))
+                                               heightDimension: .absolute(270))
         let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize, subitem: item, count: 2)
         let spacing = CGFloat(10)
         group.interItemSpacing = .fixed(spacing)
@@ -244,9 +228,7 @@ extension MainViewController {
             }
         }
     }
-    func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
-        
-    }
+
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
         guard let shouldHiseListLayout = shouldHideListLayout else { return }
         if shouldHiseListLayout {
@@ -254,7 +236,6 @@ extension MainViewController {
             cells.forEach { cell in
                 cell.changeStyle(to: .grid)
             }
-            
         } else {
             let cells = self.collectionView.visibleCells.compactMap { $0 as? ListCell}
             cells.forEach { cell in
@@ -265,10 +246,6 @@ extension MainViewController {
 }
 // MARK: - Modern Collection View Delegate
 extension MainViewController: UICollectionViewDelegate {
-    //    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-    //        return UICollectionViewCell()
-    //    }
-    
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         collectionView.deselectItem(at: indexPath, animated: true)
         let prodcutDetailVC = ProductDetailViewController()
@@ -277,10 +254,6 @@ extension MainViewController: UICollectionViewDelegate {
         print("\(productLists[indexPath.row].id) - \(productLists[indexPath.row].name) is tapped")
         navigationController?.pushViewController(prodcutDetailVC, animated: true)
     }
-    
-    //    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-    //        return self.productLists.count
-    //    }
 }
 
 

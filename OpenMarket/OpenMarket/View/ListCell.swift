@@ -43,6 +43,7 @@ final class ListCell: UICollectionViewCell {
         stackview.translatesAutoresizingMaskIntoConstraints = false
         stackview.axis = .horizontal
         stackview.alignment = .center
+        stackview.setContentCompressionResistancePriority(UILayoutPriority(800), for: .vertical)
         return stackview
     }()
     
@@ -52,6 +53,7 @@ final class ListCell: UICollectionViewCell {
         label.font = UIFont.preferredFont(forTextStyle: .title2)
         label.numberOfLines = 0
         label.text = "Mac mini"
+        label.setContentHuggingPriority(UILayoutPriority(251), for: .horizontal)
         return label
     }()
     
@@ -80,7 +82,7 @@ final class ListCell: UICollectionViewCell {
         label.translatesAutoresizingMaskIntoConstraints = false
         label.textAlignment = .right
         label.textColor = .lightGray
-//        label.setContentCompressionResistancePriority(UILayoutPriority(800), for: .horizontal)
+        label.setContentCompressionResistancePriority(UILayoutPriority(800), for: .vertical)
         label.sizeToFit()
         return label
     }()
@@ -101,12 +103,12 @@ final class ListCell: UICollectionViewCell {
     ]
     
     lazy var gridCellAutoLayoutConstraints: [NSLayoutConstraint] = [
-        productImageView.heightAnchor.constraint(equalTo:self.contentView.heightAnchor, multiplier: 0.6),
+        productImageView.heightAnchor.constraint(equalTo:self.contentView.heightAnchor, multiplier: 0.5),
 //        productImageView.heightAnchor.constraint(equalTo: self.productImageView.widthAnchor),
-        mainStackView.topAnchor.constraint(equalTo: self.contentView.topAnchor),
+        mainStackView.topAnchor.constraint(equalTo: self.contentView.topAnchor, constant: 10),
         mainStackView.leadingAnchor.constraint(equalTo: self.contentView.leadingAnchor),
         mainStackView.trailingAnchor.constraint(equalTo: self.contentView.trailingAnchor),
-        mainStackView.bottomAnchor.constraint(equalTo: self.contentView.bottomAnchor)
+        mainStackView.bottomAnchor.constraint(equalTo: self.contentView.bottomAnchor, constant: -10)
     ]
     // MARK: - Cell Initailize
     override init(frame: CGRect) {
@@ -156,15 +158,13 @@ final class ListCell: UICollectionViewCell {
     }
     
     private func setupLayer(style: CellStyle) {
-        self.layer.borderColor = nil
+        self.layer.borderColor = UIColor.lightGray.cgColor
         self.layer.borderWidth = .nan
         self.layer.cornerRadius = .nan
         switch style {
         case .list:
-            self.layer.borderColor = UIColor.lightGray.cgColor
             self.layer.borderWidth = 0.5
         case .grid:
-            self.layer.borderColor = UIColor.lightGray.cgColor
             self.layer.borderWidth = 2
             self.layer.cornerRadius = 12
         }
@@ -178,7 +178,6 @@ final class ListCell: UICollectionViewCell {
                         bargainPrice: inputData.bargainPrice
         )
         setupIndicatorLabelData(stock: inputData.stock)
-//        self.productImageView.setContentCompressionResistancePriority(UILayoutPriority(1000), for: .vertical)
     }
     
     func changeStyle(to cellStyle: CellStyle) {

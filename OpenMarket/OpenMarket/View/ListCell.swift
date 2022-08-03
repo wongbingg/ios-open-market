@@ -29,7 +29,7 @@ final class ListCell: UICollectionViewCell {
         stackview.translatesAutoresizingMaskIntoConstraints = false
         stackview.axis = .horizontal
         stackview.alignment = .fill
-        stackview.distribution = .equalSpacing
+        stackview.distribution = .fill
         return stackview
     }()
     
@@ -39,7 +39,8 @@ final class ListCell: UICollectionViewCell {
         label.font = UIFont.preferredFont(forTextStyle: .title2)
         label.numberOfLines = 0
         label.text = "Mac mini"
-        label.setContentHuggingPriority(UILayoutPriority(251), for: .horizontal)
+//        label.setContentHuggingPriority(UILayoutPriority(251), for: .horizontal)
+        label.setContentCompressionResistancePriority(UILayoutPriority(800), for: .horizontal)
         return label
     }()
     

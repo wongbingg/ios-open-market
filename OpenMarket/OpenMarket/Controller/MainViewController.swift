@@ -10,12 +10,14 @@ final class MainViewController: UIViewController {
     // MARK: - Instance Properties
     private let manager = NetworkManager.shared
     private var collectionView = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewLayout())
-    private var listDataSource: UICollectionViewDiffableDataSource<Section, Product>?
-    private var gridDataSource: UICollectionViewDiffableDataSource<Section, Product>?
+    private var listDataSource: UICollectionViewDiffableDataSource<Section, Product>? = nil
+    private var gridDataSource: UICollectionViewDiffableDataSource<Section, Product>? = nil
     private var listLayout: UICollectionViewLayout? = nil
     private var gridLayout: UICollectionViewLayout? = nil
     private var productListManager = ProductListManager()
     private var currentMaximumPage = 1
+    private var refresher: UIRefreshControl!
+    
     enum Section {
         case main
     }
@@ -30,6 +32,7 @@ final class MainViewController: UIViewController {
                 }
                 collectionView.dataSource = gridDataSource
                 collectionView.setCollectionViewLayout(gridLayout, animated: true)
+                collectionView.reloadData()
             } else {
                 
                 guard let listLayout = listLayout else {
@@ -76,10 +79,14 @@ final class MainViewController: UIViewController {
         configureListDataSource()
         configureGridDataSource()
         configureHierarchy()
+        setupRefreshController()
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        collectionView.visibleCells.forEach { cell in
+            cell.removeFromSuperview()
+        }
         fetchData()
     }
     // MARK: - Main View Controller Method
@@ -115,12 +122,12 @@ final class MainViewController: UIViewController {
     }
     
     private func fetchData() {
-        manager.requestProductPage(at: 1) { [weak self] productList in
+        manager.requestProductPage(at: currentMaximumPage) { [weak self] productList in
             self?.productListManager.fetch(list: productList)
         }
     }
     
-    private func loadData() {
+    private func addData() {
         manager.requestProductPage(at: currentMaximumPage) { [weak self] productList in
             self?.productListManager.add(list: productList)
         }
@@ -130,8 +137,12 @@ final class MainViewController: UIViewController {
         var snapshot = NSDiffableDataSourceSnapshot<Section, Product>()
         snapshot.appendSections([.main])
         snapshot.appendItems(productListManager.productList)
-        self.gridDataSource?.apply(snapshot, animatingDifferences: false)
-        self.listDataSource?.apply(snapshot, animatingDifferences: false)
+        guard let shouldHideListLayout = shouldHideListLayout else { return }
+        if shouldHideListLayout {
+            self.gridDataSource?.apply(snapshot, animatingDifferences: false)
+        } else {
+            self.listDataSource?.apply(snapshot, animatingDifferences: false)
+        }
         DispatchQueue.main.async {
             self.activitiIndicator.stopAnimating()
             self.collectionView.alpha = 1
@@ -207,6 +218,39 @@ extension MainViewController {
         collectionView.dataSource = listDataSource
         collectionView.delegate = self
     }
+    
+    private func setupRefreshController() {
+        self.refresher = UIRefreshControl()
+        self.collectionView.alwaysBounceVertical = true
+        self.refresher.tintColor = UIColor.red
+        self.refresher.addTarget(self, action: #selector(loadData), for: .valueChanged)
+        self.collectionView.refreshControl = refresher
+    }
+    
+    @objc private func loadData() {
+        self.collectionView.refreshControl?.beginRefreshing()
+        currentMaximumPage = 1
+        fetchData()
+        stopRefresher()
+    }
+    
+    private func stopRefresher() {
+        DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 0.7) {
+            self.refresher.endRefreshing()
+        }
+    }
+    
+    func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
+        if collectionView.contentOffset.y > collectionView.contentSize.height - collectionView.bounds.size.height {
+            print("앙 바닥에 닿았당")
+            DispatchQueue.main.async { [weak self] in
+                print("다음 페이지")
+                self?.currentMaximumPage += 1
+                self?.addData()
+                self?.collectionView.reloadData()
+            }
+        }
+    }
 }
 // MARK: - Modern Collection View Delegate
 extension MainViewController: UICollectionViewDelegate {
@@ -219,5 +263,3 @@ extension MainViewController: UICollectionViewDelegate {
         navigationController?.pushViewController(prodcutDetailVC, animated: true)
     }
 }
-
-

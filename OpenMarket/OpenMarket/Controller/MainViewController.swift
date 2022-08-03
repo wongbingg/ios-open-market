@@ -17,6 +17,7 @@ final class MainViewController: UIViewController {
     private var productListManager = ProductListManager()
     private var currentMaximumPage = 1
     private var refresher: UIRefreshControl!
+    var isFirstLoad: Bool = true
     
     enum Section {
         case main
@@ -31,15 +32,17 @@ final class MainViewController: UIViewController {
                     return
                 }
                 collectionView.dataSource = gridDataSource
+                collectionView.scrollToItem(at: collectionView.indexPathsForVisibleItems[0], at: .bottom, animated: true)
                 collectionView.setCollectionViewLayout(gridLayout, animated: true)
-                collectionView.reloadData()
             } else {
                 
                 guard let listLayout = listLayout else {
                     return
                 }
                 collectionView.dataSource = listDataSource
-                collectionView.setCollectionViewLayout(listLayout, animated: true)
+                collectionView.setCollectionViewLayout(listLayout, animated: true) { _ in
+                    self.collectionView.reloadData()
+                }
             }
         }
     }
@@ -71,6 +74,9 @@ final class MainViewController: UIViewController {
         NotificationCenter.default.addObserver(self,
                                                selector: #selector(applyDataSource),
                                                name: .addProductList, object: nil)
+        NotificationCenter.default.addObserver(self,
+                                               selector: #selector(loadData),
+                                               name: .refresh, object: nil)
         initializeViewController()
         self.listLayout = createListLayout()
         self.gridLayout = createGridLayout()
@@ -80,14 +86,13 @@ final class MainViewController: UIViewController {
         configureGridDataSource()
         configureHierarchy()
         setupRefreshController()
+        fetchData()
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        collectionView.visibleCells.forEach { cell in
-            cell.removeFromSuperview()
-        }
-        fetchData()
+        // 상품등록창에서 메인뷰로 넘어왔을 때 -> refresh 필요
+        // 디테일 창에서 메인뷰로 넘어왔을 때 -> 아무것도 안해줌
     }
     // MARK: - Main View Controller Method
     private func initializeViewController() {
@@ -140,8 +145,18 @@ final class MainViewController: UIViewController {
         guard let shouldHideListLayout = shouldHideListLayout else { return }
         if shouldHideListLayout {
             self.gridDataSource?.apply(snapshot, animatingDifferences: false)
+//            DispatchQueue.main.async {
+//                self.collectionView.reloadData()
+//            }
         } else {
-            self.listDataSource?.apply(snapshot, animatingDifferences: false)
+            self.listDataSource?.apply(snapshot, animatingDifferences: false) // 새로운 스냅샷을 넣는다
+            if isFirstLoad {
+                self.gridDataSource?.apply(snapshot, animatingDifferences: false) // 첫 화면 로드 시에만 활성화 , 그 뒤부턴 없어도 됨
+                isFirstLoad = false
+            }
+//            DispatchQueue.main.async {
+//                self.collectionView.reloadData()
+//            }
         }
         DispatchQueue.main.async {
             self.activitiIndicator.stopAnimating()

@@ -79,6 +79,8 @@ final class ProductSetupViewController: UIViewController {
             DispatchQueue.main.async {
                 self.showAlert(title: "알림", message: "게시 완료!!") {
                     self.navigationController?.popViewController(animated: true)
+                    // viewWillAppear 에서 fetchData 를 해주길 원함
+                    NotificationCenter.default.post(name: .refresh, object: nil)
                 }
             }
         }

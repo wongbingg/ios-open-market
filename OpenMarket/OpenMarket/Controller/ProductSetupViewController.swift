@@ -38,16 +38,30 @@ final class ProductSetupViewController: UIViewController {
     
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
-        NotificationCenter.default.removeObserver(self, name: UIResponder.keyboardWillShowNotification, object: nil)
-        NotificationCenter.default.removeObserver(self, name: UIResponder.keyboardWillHideNotification, object: nil)
+        NotificationCenter.default.removeObserver(
+            self,
+            name: UIResponder.keyboardWillShowNotification,
+            object: nil
+        )
+        NotificationCenter.default.removeObserver(
+            self,
+            name: UIResponder.keyboardWillHideNotification,
+            object: nil
+        )
     }
     // MARK: - @objc method
     @objc private func keyboardWillAppear(_ sender: Notification) {
-        guard let userInfo = sender.userInfo, let keyboarFrame = userInfo[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect else {
+        guard let userInfo = sender.userInfo,
+                let keyboarFrame = userInfo[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect else {
             return
         }
         
-        let contentInset = UIEdgeInsets(top: 0.0, left: 0.0, bottom: keyboarFrame.size.height, right: 0.0)
+        let contentInset = UIEdgeInsets(
+            top: 0.0,
+            left: 0.0,
+            bottom: keyboarFrame.size.height,
+            right: 0.0
+        )
         productSetupView?.mainScrollView.contentInset = contentInset
         productSetupView?.mainScrollView.scrollIndicatorInsets = contentInset
     }
@@ -107,13 +121,14 @@ final class ProductSetupViewController: UIViewController {
             return nil
         }
         let currency = productSetupView.currencySegmentControl.selectedSegmentIndex == 0 ? Currency.krw : Currency.usd
-        let productRegistration = ProductRegistration(name: productName,
-                                                      descriptions: descriptions,
-                                                      price: price,
-                                                      currency: currency,
-                                                      discountedPrice: discountedPrice,
-                                                      stock: stock,
-                                                      secret: URLData.secret
+        let productRegistration = ProductRegistration(
+            name: productName,
+            descriptions: descriptions,
+            price: price,
+            currency: currency,
+            discountedPrice: discountedPrice,
+            stock: stock,
+            secret: URLData.secret
         )
         return productRegistration
     }
@@ -133,13 +148,14 @@ final class ProductSetupViewController: UIViewController {
             return nil
         }
         let currency = productSetupView.currencySegmentControl.selectedSegmentIndex == 0 ? Currency.krw : Currency.usd
-        let modification = ModificationData(id: productId,
-                                            name: productName,
-                                            descriptions: descriptions,
-                                            price: price,
-                                            currency: currency,
-                                            discountedPrice: discountedPrice,
-                                            stock: stock
+        let modification = ModificationData(
+            id: productId,
+            name: productName,
+            descriptions: descriptions,
+            price: price,
+            currency: currency,
+            discountedPrice: discountedPrice,
+            stock: stock
         )
         return modification
     }
@@ -195,23 +211,53 @@ final class ProductSetupViewController: UIViewController {
     }
     
     private func setupNavigationItem() {
-        navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .cancel, target: self, action: #selector(cancelButtonDidTapped))
-        navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(doneButtonDidTapped))
+        navigationItem.leftBarButtonItem = UIBarButtonItem(
+            barButtonSystemItem: .cancel,
+            target: self,
+            action: #selector(cancelButtonDidTapped)
+        )
+        navigationItem.rightBarButtonItem = UIBarButtonItem(
+            barButtonSystemItem: .done,
+            target: self,
+            action: #selector(doneButtonDidTapped)
+        )
         navigationItem.title = viewControllerInfo.viewControllerTitle
     }
     
     private func setupKeyboard() {
-        productSetupView?.confirmButton.addTarget(self, action: #selector(hideKeyboard(_:)), for: .touchUpInside)
-        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillAppear(_:)), name: UIResponder.keyboardWillShowNotification , object: nil)
-        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillDisappear(_:)), name: UIResponder.keyboardWillHideNotification , object: nil)
-        productSetupView?.currencySegmentControl.addTarget(self, action: #selector(changeCurrencyKeyboard), for: .valueChanged)
+        productSetupView?.confirmButton.addTarget(
+            self,
+            action: #selector(hideKeyboard(_:)),
+            for: .touchUpInside
+        )
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(keyboardWillAppear(_:)),
+            name: UIResponder.keyboardWillShowNotification ,
+            object: nil
+        )
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(keyboardWillDisappear(_:)),
+            name: UIResponder.keyboardWillHideNotification ,
+            object: nil
+        )
+        productSetupView?.currencySegmentControl.addTarget(
+            self,
+            action: #selector(changeCurrencyKeyboard),
+            for: .valueChanged
+        )
     }
     
     private func setupPickerViewController() {
         self.imagePicker.sourceType = .photoLibrary
         self.imagePicker.allowsEditing = true
         self.imagePicker.delegate = self
-        productSetupView?.addImageButton.addTarget(self, action: #selector(pickImage), for: .touchUpInside)
+        productSetupView?.addImageButton.addTarget(
+            self,
+            action: #selector(pickImage),
+            for: .touchUpInside
+        )
     }
     
     private func adoptTextFieldDelegate() {
@@ -247,7 +293,8 @@ final class ProductSetupViewController: UIViewController {
 }
 
 extension ProductSetupViewController: UIImagePickerControllerDelegate, UINavigationControllerDelegate {
-    func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
+    func imagePickerController(_ picker: UIImagePickerController,
+                               didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
         var newImage: UIImage? = nil
         if let possibleImage = info[UIImagePickerController.InfoKey.editedImage] as? UIImage {
             newImage = possibleImage

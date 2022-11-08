@@ -186,6 +186,25 @@
 			path = Utility;
 			sourceTree = "<group>";
 		};
+		AFACC0402919F0E5006C55CF /* Entries */ = {
+			isa = PBXGroup;
+			children = (
+				C70FB0FA25BEF61C00C9924E /* AppDelegate.swift */,
+				C70FB0FC25BEF61C00C9924E /* SceneDelegate.swift */,
+			);
+			path = Entries;
+			sourceTree = "<group>";
+		};
+		AFACC0412919F0F2006C55CF /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				C70FB10325BEF61D00C9924E /* Assets.xcassets */,
+				C70FB10525BEF61D00C9924E /* LaunchScreen.storyboard */,
+				C70FB10825BEF61D00C9924E /* Info.plist */,
+			);
+			path = "Supporting Files";
+			sourceTree = "<group>";
+		};
 		C70FB0EE25BEF61C00C9924E = {
 			isa = PBXGroup;
 			children = (
@@ -207,17 +226,14 @@
 		C70FB0F925BEF61C00C9924E /* OpenMarket */ = {
 			isa = PBXGroup;
 			children = (
+				AFACC0402919F0E5006C55CF /* Entries */,
 				453EAC4B287C00C900EFCBB9 /* Model */,
 				4573199128912AA000795ABB /* Controller */,
 				4573199028912A8F00795ABB /* View */,
 				AF2257772889394100C5CE97 /* Extensions */,
 				453EAC65287C7C5900EFCBB9 /* Command */,
 				AF3D532E287C0FD500DBFAFA /* Utility */,
-				C70FB0FA25BEF61C00C9924E /* AppDelegate.swift */,
-				C70FB0FC25BEF61C00C9924E /* SceneDelegate.swift */,
-				C70FB10325BEF61D00C9924E /* Assets.xcassets */,
-				C70FB10525BEF61D00C9924E /* LaunchScreen.storyboard */,
-				C70FB10825BEF61D00C9924E /* Info.plist */,
+				AFACC0412919F0F2006C55CF /* Supporting Files */,
 			);
 			path = OpenMarket;
 			sourceTree = "<group>";
@@ -550,7 +566,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = SWPBG3YXG5;
-				INFOPLIST_FILE = OpenMarket/Info.plist;
+				INFOPLIST_FILE = "OpenMarket/Supporting Files/Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -570,7 +586,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = SWPBG3YXG5;
-				INFOPLIST_FILE = OpenMarket/Info.plist;
+				INFOPLIST_FILE = "OpenMarket/Supporting Files/Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",

@@ -45,7 +45,9 @@ final class NetworkManager {
         dataTask.resume()
     }
     // MARK: - POST 상품 등록
-    func requestProductRegistration(with registration: ProductRegistration, images: [UIImage] ,_ completion: @escaping (ProductDetail) -> Void) {
+    func requestProductRegistration(with registration: ProductRegistration,
+                                    images: [UIImage] ,
+                                    _ completion: @escaping (ProductDetail) -> Void) {
         guard let url = URL(string: URLData.host + URLData.apiPath) else {
             return
         }
@@ -61,7 +63,9 @@ final class NetworkManager {
         dataTask.resume()
     }
     // MARK: - FETCH 상품 수정
-    func requestProductModification(id: Int, rowData: String, _ completion: @escaping (ProductDetail) -> Void) {
+    func requestProductModification(id: Int,
+                                    rowData: String,
+                                    _ completion: @escaping (ProductDetail) -> Void) {
         guard let url = URL(string: URLData.host + URLData.apiPath + "/\(id)") else {
             return
         }
@@ -93,7 +97,9 @@ final class NetworkManager {
         dataTask.resume()
     }
     
-    func requestProductDelete(id: Int, key: String, _ completion: @escaping (ProductDetail) -> Void) {
+    func requestProductDelete(id: Int,
+                              key: String,
+                              _ completion: @escaping (ProductDetail) -> Void) {
         guard let url = URL(string: URLData.host + URLData.apiPath + "/\(id)/\(key)") else {
             return
         }
@@ -109,7 +115,9 @@ final class NetworkManager {
 }
 
 extension NetworkManager {
-    private func createDataTask<T: Decodable>(request: URLRequest, type: T.Type, _ completion: @escaping (T) -> Void ) -> URLSessionDataTask {
+    private func createDataTask<T: Decodable>(request: URLRequest,
+                                              type: T.Type,
+                                              _ completion: @escaping (T) -> Void ) -> URLSessionDataTask {
         session.dataTask(with: request) { (data, response, error) in
             guard error == nil else {
                 return
@@ -117,18 +125,20 @@ extension NetworkManager {
             let successsRange = 200..<300
             guard let statusCode = (response as? HTTPURLResponse)?.statusCode,
                   successsRange.contains(statusCode) else {
-                      return
-                  }
+                return
+            }
             guard let resultData = data,
                   let fetchedData = decode(from: resultData, to: type.self) else {
-                      debugPrint("ERROR: FAILURE DECODING ")
-                      return
-                  }
+                debugPrint("ERROR: FAILURE DECODING ")
+                return
+            }
             completion(fetchedData)
         }
     }
     
-    private func createPostBody(with inputData: ProductRegistration, images: [UIImage], at boundary: String) -> Data? {
+    private func createPostBody(with inputData: ProductRegistration,
+                                images: [UIImage],
+                                at boundary: String) -> Data? {
         var data = Data()
         guard let paramData = try? JSONEncoder().encode(inputData) else {
             return nil
@@ -194,4 +204,3 @@ extension NetworkManager {
         return compressedImage
     }
 }
-

@@ -6,7 +6,7 @@
 //
 
 enum URLData {
-    static let host = "https://market-training.yagom-academy.kr"
+    static let host = "https://openmarket.yagom-academy.kr"
     static let apiPath = "/api/products"
     static let identifier = "e4c0e472-0335-11ed-9676-05ce201d7309"
     static let secret = "p0ilm9kwYb"

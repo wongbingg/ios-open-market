@@ -7,15 +7,15 @@
 import Foundation
 
 struct ProductPage: Codable {
-    let pageNo: Int
-    let itemsPerPage: Int
-    let totalCount: Int
-    let offset: Int
-    let limit: Int
+    let pageNo: Int?
+    let itemsPerPage: Int?
+    let totalCount: Int?
+    let offset: Int?
+    let limit: Int?
     let pages: [Product]
-    let lastPage: Int
-    let hasNext: Bool
-    let hasPrev: Bool
+    let lastPage: Int?
+    let hasNext: Bool?
+    let hasPrev: Bool?
     
     enum CodingKeys: String, CodingKey {
         case pageNo = "page_no"

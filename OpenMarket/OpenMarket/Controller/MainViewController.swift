@@ -265,7 +265,6 @@ extension MainViewController {
             }
         }
     }
-    
 }
 // MARK: - Modern Collection View Delegate
 extension MainViewController: UICollectionViewDelegate {
@@ -282,5 +281,3 @@ extension MainViewController: UICollectionViewDelegate {
         navigationController?.pushViewController(prodcutDetailVC, animated: true)
     }
 }
-
-
